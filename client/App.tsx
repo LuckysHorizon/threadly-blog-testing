@@ -11,6 +11,7 @@ import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Blogs from "./pages/Blogs";
 import BlogPost from "./pages/BlogPost";
+import Write from "./pages/Write";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
 import { BookOpen, Users, FolderOpen, Info } from "lucide-react";
