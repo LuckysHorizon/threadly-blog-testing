@@ -129,7 +129,7 @@ export default function BlogCard({ post, variant = "default" }: BlogCardProps) {
                 {post.title}
               </h4>
               <div className="flex items-center text-xs text-gray-400 space-x-2">
-                <span>{post.author}</span>
+                <span>{author.name}</span>
                 <span>•</span>
                 <span>{post.publishedAt}</span>
               </div>
