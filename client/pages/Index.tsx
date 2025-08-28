@@ -151,22 +151,22 @@ export default function Index() {
       </section>
 
       {/* Latest Articles Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 sm:mb-12 space-y-4 sm:space-y-0">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-2">Latest Articles</h2>
-              <p className="text-gray-400">Stay updated with the newest insights and discoveries</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Latest Articles</h2>
+              <p className="text-gray-400 text-sm sm:text-base">Stay updated with the newest insights and discoveries</p>
             </div>
 
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" className="glass-button text-white border-white/20 hover:bg-white/10">
-                <Search className="h-4 w-4 mr-2" />
-                Search
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <Button variant="outline" className="glass-button text-white border-white/20 hover:bg-white/10 px-3 py-2 text-sm">
+                <Search className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Search</span>
               </Button>
-              <Button variant="outline" className="glass-button text-white border-white/20 hover:bg-white/10">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Trending
+              <Button variant="outline" className="glass-button text-white border-white/20 hover:bg-white/10 px-3 py-2 text-sm">
+                <TrendingUp className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Trending</span>
               </Button>
             </div>
           </div>
