@@ -8,12 +8,19 @@ interface BlogCardProps {
 }
 
 export default function BlogCard({ post, variant = "default" }: BlogCardProps) {
+  const author = getAuthorById(post.authorId);
+
   const formatNumber = (num: number) => {
     if (num >= 1000) {
       return `${(num / 1000).toFixed(1)}k`;
     }
     return num.toString();
   };
+
+  // Fallback if author not found
+  if (!author) {
+    return null;
+  }
 
   if (variant === "featured") {
     return (
