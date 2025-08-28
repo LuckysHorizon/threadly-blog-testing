@@ -177,13 +177,13 @@ export default function Index() {
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-8 sm:mt-12 px-4 sm:px-0">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0 shadow-glow px-8 py-3"
+              className="w-full sm:w-auto bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0 shadow-glow px-6 sm:px-8 py-3 text-base sm:text-lg"
             >
               Load More Articles
-              <ArrowRight className="h-5 w-5 ml-2" />
+              <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
             </Button>
           </div>
         </div>
