@@ -227,6 +227,12 @@ export default function Navigation() {
           </div>
         </div>
       )}
+
+      {/* Sign In Modal */}
+      <SignInModal
+        isOpen={isSignInModalOpen}
+        onClose={() => setIsSignInModalOpen(false)}
+      />
     </nav>
   );
 }
