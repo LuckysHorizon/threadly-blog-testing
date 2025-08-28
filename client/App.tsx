@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Blogs from "./pages/Blogs";
 import BlogPost from "./pages/BlogPost";
 import Write from "./pages/Write";
+import Admin from "./pages/Admin";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
 import { BookOpen, Users, FolderOpen, Info } from "lucide-react";
