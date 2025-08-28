@@ -78,18 +78,18 @@ export default function Index() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-2xl sm:max-w-3xl mx-auto px-4 sm:px-0">
               {[
                 { icon: Users, label: "Active Readers", value: "50,000+" },
                 { icon: BookOpen, label: "Articles Published", value: "1,200+" },
                 { icon: Globe, label: "Countries Reached", value: "120+" }
               ].map((stat, index) => (
                 <div key={index} className="text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-brand-500/20 to-purple-500/20 rounded-xl mb-3">
-                    <stat.icon className="h-6 w-6 text-brand-400" />
+                  <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-brand-500/20 to-purple-500/20 rounded-xl mb-2 sm:mb-3">
+                    <stat.icon className="h-5 w-5 sm:h-6 sm:w-6 text-brand-400" />
                   </div>
-                  <div className="text-2xl font-bold text-white">{stat.value}</div>
-                  <div className="text-gray-400 text-sm">{stat.label}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-white">{stat.value}</div>
+                  <div className="text-gray-400 text-xs sm:text-sm">{stat.label}</div>
                 </div>
               ))}
             </div>
