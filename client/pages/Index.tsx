@@ -100,13 +100,13 @@ export default function Index() {
       {/* Featured Articles Section */}
       <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 sm:mb-12 space-y-4 sm:space-y-0">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-2">Featured Articles</h2>
-              <p className="text-gray-400">Handpicked stories from our top contributors</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Featured Articles</h2>
+              <p className="text-gray-400 text-sm sm:text-base">Handpicked stories from our top contributors</p>
             </div>
 
-            <Button variant="outline" className="glass-button text-white border-white/20 hover:bg-white/10">
+            <Button variant="outline" className="glass-button text-white border-white/20 hover:bg-white/10 self-start sm:self-auto px-4 py-2 text-sm">
               View All
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
