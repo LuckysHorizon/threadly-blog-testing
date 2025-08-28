@@ -8,7 +8,10 @@ import SignInModal from "./SignInModal";
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, isAuthenticated, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
