@@ -190,36 +190,36 @@ export default function Index() {
       </section>
 
       {/* Newsletter Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <div className="glass-card text-center p-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-brand-500 to-purple-500 rounded-2xl mb-6">
-              <Sparkles className="h-8 w-8 text-white" />
+          <div className="glass-card text-center p-6 sm:p-8 lg:p-12">
+            <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-r from-brand-500 to-purple-500 rounded-xl sm:rounded-2xl mb-4 sm:mb-6">
+              <Sparkles className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-white" />
             </div>
 
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4">
               Stay Ahead of the AI Revolution
             </h2>
 
-            <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-gray-300 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
               Get weekly insights, breaking news, and exclusive content delivered directly to your inbox.
               Join 25,000+ AI enthusiasts who trust our newsletter.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 max-w-md mx-auto">
+            <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-center sm:space-y-0 sm:space-x-4 max-w-lg mx-auto">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 backdrop-blur-xl"
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 backdrop-blur-xl text-sm sm:text-base"
               />
               <Button
-                className="bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0 px-6 py-3 whitespace-nowrap"
+                className="w-full sm:w-auto bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0 px-6 py-3 whitespace-nowrap text-sm sm:text-base"
               >
                 Subscribe
               </Button>
             </div>
 
-            <p className="text-xs text-gray-400 mt-4">
+            <p className="text-xs text-gray-400 mt-3 sm:mt-4">
               No spam, unsubscribe at any time. We respect your privacy.
             </p>
           </div>
