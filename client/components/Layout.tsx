@@ -11,18 +11,24 @@ export default function Layout({ children }: LayoutProps) {
       {/* Background Pattern */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 -left-4 w-72 h-72 bg-brand-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-float"></div>
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-float" style={{ animationDelay: "2s" }}></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-brand-400 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-float" style={{ animationDelay: "4s" }}></div>
-        
+        <div
+          className="absolute top-0 -right-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-float"
+          style={{ animationDelay: "2s" }}
+        ></div>
+        <div
+          className="absolute -bottom-8 left-20 w-72 h-72 bg-brand-400 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-float"
+          style={{ animationDelay: "4s" }}
+        ></div>
+
         {/* Grid Pattern */}
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage: `
               linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
               linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
             `,
-            backgroundSize: "50px 50px"
+            backgroundSize: "50px 50px",
           }}
         ></div>
       </div>
@@ -31,9 +37,7 @@ export default function Layout({ children }: LayoutProps) {
       <Navigation />
 
       {/* Main Content */}
-      <main className="relative pt-24">
-        {children}
-      </main>
+      <main className="relative pt-24">{children}</main>
 
       {/* Footer */}
       <footer className="relative mt-20 border-t border-white/10 bg-black/20 backdrop-blur-xl">
@@ -43,19 +47,25 @@ export default function Layout({ children }: LayoutProps) {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <div className="bg-gradient-to-r from-brand-500 to-purple-500 p-2 rounded-xl">
-                  <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <svg
+                    className="h-6 w-6 text-white"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
                     <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <span className="text-xl font-bold text-gradient">AI Blog</span>
               </div>
               <p className="text-gray-400 max-w-md mb-4">
-                The future of content creation powered by artificial intelligence. 
-                Discover, create, and share insights that matter.
+                The future of content creation powered by artificial
+                intelligence. Discover, create, and share insights that matter.
               </p>
               <div className="flex items-center space-x-1 px-3 py-2 rounded-full bg-gradient-to-r from-brand-500/10 to-purple-500/10 border border-brand-400/20 w-fit">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-xs text-gray-300">AI-Powered Platform</span>
+                <span className="text-xs text-gray-300">
+                  AI-Powered Platform
+                </span>
               </div>
             </div>
 
@@ -63,13 +73,18 @@ export default function Layout({ children }: LayoutProps) {
             <div>
               <h3 className="text-white font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2">
-                {["Home", "Blogs", "Categories", "Authors", "About"].map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-gray-400 hover:text-brand-400 transition-colors duration-300">
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                {["Home", "Blogs", "Categories", "Authors", "About"].map(
+                  (link) => (
+                    <li key={link}>
+                      <a
+                        href="#"
+                        className="text-gray-400 hover:text-brand-400 transition-colors duration-300"
+                      >
+                        {link}
+                      </a>
+                    </li>
+                  ),
+                )}
               </ul>
             </div>
 
@@ -77,9 +92,18 @@ export default function Layout({ children }: LayoutProps) {
             <div>
               <h3 className="text-white font-semibold mb-4">Resources</h3>
               <ul className="space-y-2">
-                {["API Docs", "Write for Us", "Privacy Policy", "Terms of Service", "Support"].map((link) => (
+                {[
+                  "API Docs",
+                  "Write for Us",
+                  "Privacy Policy",
+                  "Terms of Service",
+                  "Support",
+                ].map((link) => (
                   <li key={link}>
-                    <a href="#" className="text-gray-400 hover:text-brand-400 transition-colors duration-300">
+                    <a
+                      href="#"
+                      className="text-gray-400 hover:text-brand-400 transition-colors duration-300"
+                    >
                       {link}
                     </a>
                   </li>
@@ -95,9 +119,9 @@ export default function Layout({ children }: LayoutProps) {
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <span className="text-gray-500 text-sm">Follow us:</span>
               {["Twitter", "GitHub", "LinkedIn"].map((social) => (
-                <a 
+                <a
                   key={social}
-                  href="#" 
+                  href="#"
                   className="text-gray-400 hover:text-brand-400 transition-colors duration-300 text-sm"
                 >
                   {social}

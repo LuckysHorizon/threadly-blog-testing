@@ -1,6 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Search, Menu, X, User, LogIn, Brain, Sparkles, LogOut, Settings, Edit, PlusCircle } from "lucide-react";
+import {
+  Search,
+  Menu,
+  X,
+  User,
+  LogIn,
+  Brain,
+  Sparkles,
+  LogOut,
+  Settings,
+  Edit,
+  PlusCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import SignInModal from "./SignInModal";
@@ -26,7 +38,10 @@ export default function Navigation() {
   // Close user menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
         setIsUserMenuOpen(false);
       }
     };
@@ -59,23 +74,28 @@ export default function Navigation() {
         className={`fixed top-2 sm:top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${
           isScrolled ? "glass-nav shadow-glass-lg" : "glass-nav"
         }`}
-        style={{ 
-          width: "calc(100% - 1rem)", 
+        style={{
+          width: "calc(100% - 1rem)",
           maxWidth: "1200px",
           // Ensure proper spacing on mobile
-          margin: "0 0.5rem"
+          margin: "0 0.5rem",
         }}
       >
         <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group flex-shrink-0">
+          <Link
+            to="/"
+            className="flex items-center space-x-2 group flex-shrink-0"
+          >
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-brand-400 to-purple-400 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
               <div className="relative bg-gradient-to-r from-brand-500 to-purple-500 p-1.5 sm:p-2 rounded-xl">
                 <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
             </div>
-            <span className="text-lg sm:text-xl font-bold text-gradient">AI Blog</span>
+            <span className="text-lg sm:text-xl font-bold text-gradient">
+              AI Blog
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -123,7 +143,9 @@ export default function Navigation() {
             {/* AI Features Indicator - Only on larger screens */}
             <div className="hidden xl:flex items-center space-x-1 px-2.5 py-1.5 rounded-full bg-gradient-to-r from-brand-500/20 to-purple-500/20 border border-brand-400/30">
               <Sparkles className="h-3 w-3 text-brand-400 animate-pulse" />
-              <span className="text-xs text-brand-300 font-medium">AI Powered</span>
+              <span className="text-xs text-brand-300 font-medium">
+                AI Powered
+              </span>
             </div>
 
             {/* Auth Section */}
@@ -140,20 +162,28 @@ export default function Navigation() {
                     alt={user.name}
                     className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-white/20"
                   />
-                  <span className="hidden sm:inline text-sm max-w-20 lg:max-w-none truncate">{user.name}</span>
+                  <span className="hidden sm:inline text-sm max-w-20 lg:max-w-none truncate">
+                    {user.name}
+                  </span>
                 </Button>
 
                 {/* User Dropdown Menu */}
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 sm:w-52 glass-card py-2 z-50 shadow-glass-lg">
                     <div className="px-4 py-2 border-b border-white/10">
-                      <p className="text-white text-sm font-medium truncate">{user.name}</p>
-                      <p className="text-gray-400 text-xs truncate">{user.email}</p>
-                      <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs ${
-                        user.role === 'admin'
-                          ? 'bg-yellow-500/20 text-yellow-400'
-                          : 'bg-blue-500/20 text-blue-400'
-                      }`}>
+                      <p className="text-white text-sm font-medium truncate">
+                        {user.name}
+                      </p>
+                      <p className="text-gray-400 text-xs truncate">
+                        {user.email}
+                      </p>
+                      <span
+                        className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs ${
+                          user.role === "admin"
+                            ? "bg-yellow-500/20 text-yellow-400"
+                            : "bg-blue-500/20 text-blue-400"
+                        }`}
+                      >
                         {user.role}
                       </span>
                     </div>
@@ -185,7 +215,7 @@ export default function Navigation() {
                       Settings
                     </Link>
 
-                    {user.role === 'admin' && (
+                    {user.role === "admin" && (
                       <Link
                         to="/admin"
                         className="flex items-center px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 transition-colors duration-200"
@@ -268,7 +298,7 @@ export default function Navigation() {
                   {item.name}
                 </Link>
               ))}
-              
+
               {/* Mobile Search */}
               <Button
                 variant="ghost"
@@ -282,9 +312,7 @@ export default function Navigation() {
               {/* Mobile Write Button - Only for authenticated users */}
               {isAuthenticated && (
                 <Link to="/write" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button
-                    className="w-full justify-start bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 mt-3"
-                  >
+                  <Button className="w-full justify-start bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 mt-3">
                     <PlusCircle className="h-4 w-4 mr-3" />
                     Write New Article
                   </Button>
@@ -324,7 +352,7 @@ export default function Navigation() {
 
       {/* Backdrop for mobile menu */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />

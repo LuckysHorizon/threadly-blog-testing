@@ -1,5 +1,14 @@
 import { useState, useMemo } from "react";
-import { Search, Filter, SortDesc, Grid, List, Tag, Clock, TrendingUp } from "lucide-react";
+import {
+  Search,
+  Filter,
+  SortDesc,
+  Grid,
+  List,
+  Tag,
+  Clock,
+  TrendingUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BlogCard from "@/components/BlogCard";
 import { mockBlogPosts, mockCategories } from "@/lib/mockData";
@@ -21,17 +30,19 @@ export default function Blogs() {
     // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(
-        post =>
+        (post) =>
           post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
           post.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+          post.tags.some((tag) =>
+            tag.toLowerCase().includes(searchQuery.toLowerCase()),
+          ),
       );
     }
 
     // Filter by category
     if (selectedCategory) {
-      filtered = filtered.filter(post => post.category === selectedCategory);
+      filtered = filtered.filter((post) => post.category === selectedCategory);
     }
 
     // Sort posts
@@ -42,10 +53,16 @@ export default function Blogs() {
         case "trending":
           return b.stats.likes - a.stats.likes;
         case "oldest":
-          return new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime();
+          return (
+            new Date(a.publishedAt).getTime() -
+            new Date(b.publishedAt).getTime()
+          );
         case "latest":
         default:
-          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+          return (
+            new Date(b.publishedAt).getTime() -
+            new Date(a.publishedAt).getTime()
+          );
       }
     });
 
@@ -68,7 +85,8 @@ export default function Blogs() {
             AI Blog <span className="text-gradient">Articles</span>
           </h1>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-            Discover cutting-edge insights, tutorials, and research in artificial intelligence
+            Discover cutting-edge insights, tutorials, and research in
+            artificial intelligence
           </p>
         </div>
 
@@ -99,7 +117,11 @@ export default function Blogs() {
                   className="appearance-none bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 pr-8 focus:outline-none focus:ring-2 focus:ring-brand-500 backdrop-blur-xl"
                 >
                   {sortOptions.map((option) => (
-                    <option key={option.value} value={option.value} className="bg-gray-900">
+                    <option
+                      key={option.value}
+                      value={option.value}
+                      className="bg-gray-900"
+                    >
                       {option.label}
                     </option>
                   ))}
@@ -187,7 +209,8 @@ export default function Blogs() {
         {/* Results Summary */}
         <div className="flex items-center justify-between mb-8">
           <p className="text-gray-400">
-            {filteredAndSortedPosts.length} article{filteredAndSortedPosts.length !== 1 ? 's' : ''} found
+            {filteredAndSortedPosts.length} article
+            {filteredAndSortedPosts.length !== 1 ? "s" : ""} found
             {selectedCategory && (
               <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-brand-500/20 text-brand-400">
                 {selectedCategory}
@@ -227,15 +250,17 @@ export default function Blogs() {
 
         {/* Articles Grid/List */}
         {filteredAndSortedPosts.length > 0 ? (
-          <div className={`${
-            viewMode === "grid" 
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" 
-              : "space-y-6"
-          }`}>
+          <div
+            className={`${
+              viewMode === "grid"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                : "space-y-6"
+            }`}
+          >
             {filteredAndSortedPosts.map((post) => (
-              <BlogCard 
-                key={post.id} 
-                post={post} 
+              <BlogCard
+                key={post.id}
+                post={post}
                 variant={viewMode === "list" ? "compact" : "default"}
               />
             ))}
@@ -245,7 +270,9 @@ export default function Blogs() {
           <div className="text-center py-20">
             <div className="glass-card p-12 max-w-md mx-auto">
               <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No articles found</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                No articles found
+              </h3>
               <p className="text-gray-400 mb-6">
                 Try adjusting your search criteria or browse all categories
               </p>

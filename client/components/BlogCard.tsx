@@ -1,4 +1,11 @@
-import { Clock, User, ArrowRight, Eye, Heart, MessageCircle } from "lucide-react";
+import {
+  Clock,
+  User,
+  ArrowRight,
+  Eye,
+  Heart,
+  MessageCircle,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { BlogPost, getAuthorById } from "@/lib/mockData";
 
@@ -34,7 +41,7 @@ export default function BlogCard({ post, variant = "default" }: BlogCardProps) {
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-            
+
             {/* Category Badge */}
             <div className="absolute top-4 left-4">
               <span className="glass-button text-xs font-medium text-white px-3 py-1">
@@ -57,10 +64,8 @@ export default function BlogCard({ post, variant = "default" }: BlogCardProps) {
             <h3 className="text-xl font-bold text-white mb-3 group-hover:text-brand-400 transition-colors duration-300 line-clamp-2">
               {post.title}
             </h3>
-            
-            <p className="text-gray-300 mb-4 line-clamp-3">
-              {post.excerpt}
-            </p>
+
+            <p className="text-gray-300 mb-4 line-clamp-3">{post.excerpt}</p>
 
             {/* Author & Meta */}
             <div className="flex items-center justify-between mb-4">
@@ -71,7 +76,9 @@ export default function BlogCard({ post, variant = "default" }: BlogCardProps) {
                   className="w-8 h-8 rounded-full border border-white/20"
                 />
                 <div>
-                  <p className="text-white text-sm font-medium">{author.name}</p>
+                  <p className="text-white text-sm font-medium">
+                    {author.name}
+                  </p>
                   <div className="flex items-center text-gray-400 text-xs space-x-2">
                     <span>{post.publishedAt}</span>
                     <span>•</span>
@@ -122,9 +129,11 @@ export default function BlogCard({ post, variant = "default" }: BlogCardProps) {
               alt={post.title}
               className="w-20 h-20 rounded-xl object-cover"
             />
-            
+
             <div className="flex-1 min-w-0">
-              <span className="text-xs text-brand-400 font-medium">{post.category}</span>
+              <span className="text-xs text-brand-400 font-medium">
+                {post.category}
+              </span>
               <h4 className="font-semibold text-white text-sm mb-1 line-clamp-2 group-hover:text-brand-400 transition-colors duration-300">
                 {post.title}
               </h4>
@@ -152,7 +161,7 @@ export default function BlogCard({ post, variant = "default" }: BlogCardProps) {
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-          
+
           <div className="absolute top-3 left-3">
             <span className="glass-button text-xs font-medium text-white px-2 py-1">
               {post.category}
@@ -165,7 +174,7 @@ export default function BlogCard({ post, variant = "default" }: BlogCardProps) {
           <h3 className="text-lg font-bold text-white mb-2 group-hover:text-brand-400 transition-colors duration-300 line-clamp-2">
             {post.title}
           </h3>
-          
+
           <p className="text-gray-300 text-sm mb-4 line-clamp-2">
             {post.excerpt}
           </p>

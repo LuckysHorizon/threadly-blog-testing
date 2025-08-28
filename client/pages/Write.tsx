@@ -1,8 +1,22 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { 
-  ArrowLeft, Save, Eye, Send, Image, Bold, Italic, Code, List, 
-  Link2, Quote, Heading, AlertCircle, CheckCircle, Upload, X 
+import {
+  ArrowLeft,
+  Save,
+  Eye,
+  Send,
+  Image,
+  Bold,
+  Italic,
+  Code,
+  List,
+  Link2,
+  Quote,
+  Heading,
+  AlertCircle,
+  CheckCircle,
+  Upload,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,7 +25,7 @@ import { mockCategories } from "@/lib/mockData";
 export default function Write() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  
+
   // Form state
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -21,7 +35,7 @@ export default function Write() {
   const [tagInput, setTagInput] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [isPreview, setIsPreview] = useState(false);
-  
+
   // State management
   const [isDraft, setIsDraft] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -40,7 +54,7 @@ export default function Write() {
   // Auto-save functionality
   const autoSave = useCallback(async () => {
     if (!title.trim() && !content.trim()) return;
-    
+
     setIsSaving(true);
     try {
       // Simulate auto-save to localStorage and backend
@@ -52,14 +66,14 @@ export default function Write() {
         tags,
         coverImage,
         lastSaved: new Date().toISOString(),
-        authorId: user?.id
+        authorId: user?.id,
       };
-      
+
       localStorage.setItem("aiblog_draft", JSON.stringify(draftData));
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       setLastSaved(new Date());
       setError("");
     } catch (err) {
@@ -111,14 +125,16 @@ export default function Write() {
     setIsSubmitting(true);
     try {
       // Simulate submission
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setSuccess("Article submitted for review! You'll be notified when it's approved.");
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      setSuccess(
+        "Article submitted for review! You'll be notified when it's approved.",
+      );
       setIsDraft(false);
-      
+
       // Clear draft from localStorage
       localStorage.removeItem("aiblog_draft");
-      
+
       setTimeout(() => {
         navigate("/blogs");
       }, 2000);
@@ -139,39 +155,60 @@ export default function Write() {
 
   // Remove tag
   const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+    setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
   // Format selection helpers
   const formatText = (prefix: string, suffix: string = "") => {
-    const textarea = document.querySelector('textarea[name="content"]') as HTMLTextAreaElement;
+    const textarea = document.querySelector(
+      'textarea[name="content"]',
+    ) as HTMLTextAreaElement;
     if (!textarea) return;
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = content.substring(start, end);
     const replacement = `${prefix}${selectedText}${suffix}`;
-    
-    const newContent = content.substring(0, start) + replacement + content.substring(end);
+
+    const newContent =
+      content.substring(0, start) + replacement + content.substring(end);
     setContent(newContent);
-    
+
     // Restore cursor position
     setTimeout(() => {
       textarea.focus();
-      textarea.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
+      textarea.setSelectionRange(
+        start + prefix.length,
+        start + prefix.length + selectedText.length,
+      );
     }, 0);
   };
 
   // Markdown rendering (simplified)
   const renderMarkdown = (text: string) => {
     return text
-      .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold text-white mt-6 mb-3">$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold text-white mt-8 mb-4">$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold text-white mt-8 mb-4">$1</h1>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
+      .replace(
+        /^### (.*$)/gim,
+        '<h3 class="text-xl font-bold text-white mt-6 mb-3">$1</h3>',
+      )
+      .replace(
+        /^## (.*$)/gim,
+        '<h2 class="text-2xl font-bold text-white mt-8 mb-4">$1</h2>',
+      )
+      .replace(
+        /^# (.*$)/gim,
+        '<h1 class="text-3xl font-bold text-white mt-8 mb-4">$1</h1>',
+      )
+      .replace(
+        /\*\*(.*?)\*\*/g,
+        '<strong class="font-bold text-white">$1</strong>',
+      )
       .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-      .replace(/`(.*?)`/g, '<code class="bg-gray-800 px-1 py-0.5 rounded text-brand-400">$1</code>')
-      .replace(/\n/g, '<br>');
+      .replace(
+        /`(.*?)`/g,
+        '<code class="bg-gray-800 px-1 py-0.5 rounded text-brand-400">$1</code>',
+      )
+      .replace(/\n/g, "<br>");
   };
 
   if (!isAuthenticated || !user) {
@@ -185,12 +222,16 @@ export default function Write() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Link to="/blogs">
-              <Button variant="outline" size="sm" className="glass-button text-white border-white/20 hover:bg-white/10">
+              <Button
+                variant="outline"
+                size="sm"
+                className="glass-button text-white border-white/20 hover:bg-white/10"
+              >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
             </Link>
-            
+
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-white">Write Article</h1>
               {lastSaved && (
@@ -225,7 +266,7 @@ export default function Write() {
               size="sm"
               onClick={() => setIsPreview(!isPreview)}
               className={`glass-button border-white/20 hover:bg-white/10 ${
-                isPreview ? 'text-brand-400 border-brand-400/30' : 'text-white'
+                isPreview ? "text-brand-400 border-brand-400/30" : "text-white"
               }`}
             >
               <Eye className="h-4 w-4 mr-2" />
@@ -235,7 +276,9 @@ export default function Write() {
             <Button
               size="sm"
               onClick={handleSubmit}
-              disabled={isSubmitting || !title.trim() || !content.trim() || !category}
+              disabled={
+                isSubmitting || !title.trim() || !content.trim() || !category
+              }
               className="bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0 shadow-glow"
             >
               {isSubmitting ? (
@@ -363,9 +406,11 @@ export default function Write() {
               {/* Content Editor/Preview */}
               <div className="min-h-[500px]">
                 {isPreview ? (
-                  <div 
+                  <div
                     className="prose prose-lg prose-invert max-w-none text-gray-300 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
+                    dangerouslySetInnerHTML={{
+                      __html: renderMarkdown(content),
+                    }}
                   />
                 ) : (
                   <textarea
@@ -394,8 +439,10 @@ The content will auto-save every 5 seconds."
           <div className="lg:col-span-1 space-y-6">
             {/* Article Settings */}
             <div className="glass-card p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Article Settings</h3>
-              
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Article Settings
+              </h3>
+
               {/* Category */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -408,7 +455,11 @@ The content will auto-save every 5 seconds."
                 >
                   <option value="">Select a category</option>
                   {mockCategories.map((cat) => (
-                    <option key={cat.name} value={cat.name} className="bg-gray-900">
+                    <option
+                      key={cat.name}
+                      value={cat.name}
+                      className="bg-gray-900"
+                    >
                       {cat.name}
                     </option>
                   ))}
@@ -441,7 +492,9 @@ The content will auto-save every 5 seconds."
                     type="text"
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), handleAddTag())
+                    }
                     placeholder="Add tag..."
                     className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                     disabled={tags.length >= 5}
@@ -484,7 +537,9 @@ The content will auto-save every 5 seconds."
 
             {/* Quick Tips */}
             <div className="glass-card p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Writing Tips</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Writing Tips
+              </h3>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>• Use clear, descriptive headings</li>
                 <li>• Keep paragraphs short and readable</li>

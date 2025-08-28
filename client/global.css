@@ -128,16 +128,33 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(ellipse at top, rgb(24, 24, 27) 0%, rgb(9, 9, 11) 100%);
+    font-family:
+      "Inter",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+    background: radial-gradient(
+      ellipse at top,
+      rgb(24, 24, 27) 0%,
+      rgb(9, 9, 11) 100%
+    );
     background-attachment: fixed;
   }
 
   /* Glass morphism utility classes */
   .glass {
     @apply bg-white/5 backdrop-blur-xl border border-white/10;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 100%
+    );
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 4px 16px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
   .glass-card {

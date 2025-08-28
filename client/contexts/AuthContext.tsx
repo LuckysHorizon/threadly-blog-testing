@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 interface User {
   id: string;
@@ -57,32 +63,34 @@ const mockUsers = [
     name: "Sarah Chen",
     username: "sarahchen",
     email: "admin@aiblog.com",
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b5bb?w=100&h=100&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1494790108755-2616b612b5bb?w=100&h=100&fit=crop&crop=face",
     role: "admin" as const,
     bio: "AI Researcher at Stanford University, specializing in machine learning and neural networks.",
     socialLinks: {
       twitter: "https://twitter.com/sarahchen",
-      github: "https://github.com/sarahchen"
+      github: "https://github.com/sarahchen",
     },
     joinedAt: "2023-01-15",
     articlesCount: 12,
-    followersCount: 15400
+    followersCount: 15400,
   },
   {
     id: "user-1",
     name: "Alex Rodriguez",
     username: "alexrod",
     email: "user@aiblog.com",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
     role: "user" as const,
     bio: "Senior Data Scientist passionate about AI and machine learning.",
     socialLinks: {
-      linkedin: "https://linkedin.com/in/alexrodriguez"
+      linkedin: "https://linkedin.com/in/alexrodriguez",
     },
     joinedAt: "2023-03-20",
     articlesCount: 5,
-    followersCount: 890
-  }
+    followersCount: 890,
+  },
 ];
 
 export function AuthProvider({ children }: AuthProviderProps) {
@@ -105,20 +113,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Find user in mock database
-      const foundUser = mockUsers.find(u => u.email === email);
-      
+      const foundUser = mockUsers.find((u) => u.email === email);
+
       if (!foundUser) {
         throw new Error("User not found");
       }
-      
+
       // In a real app, password would be verified here
       if (password !== "password123") {
         throw new Error("Invalid password");
       }
-      
+
       setUser(foundUser);
       localStorage.setItem("aiblog_user", JSON.stringify(foundUser));
     } catch (error) {
@@ -132,19 +140,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       // Check if user already exists
-      const existingUser = mockUsers.find(u => u.email === data.email);
+      const existingUser = mockUsers.find((u) => u.email === data.email);
       if (existingUser) {
         throw new Error("User with this email already exists");
       }
 
       // Generate username if not provided
-      const username = data.username || data.email.split('@')[0];
-      
+      const username = data.username || data.email.split("@")[0];
+
       // Check if username is taken
-      const usernameExists = mockUsers.find(u => u.username === username);
+      const usernameExists = mockUsers.find((u) => u.username === username);
       if (usernameExists) {
         throw new Error("Username is already taken");
       }
@@ -152,21 +160,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Create new user
       const newUser: User = {
         id: `user-${Date.now()}`,
-        name: data.name || data.email.split('@')[0],
+        name: data.name || data.email.split("@")[0],
         username: username,
         email: data.email,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
         role: "user",
         bio: "",
         socialLinks: {},
-        joinedAt: new Date().toISOString().split('T')[0],
+        joinedAt: new Date().toISOString().split("T")[0],
         articlesCount: 0,
-        followersCount: 0
+        followersCount: 0,
       };
 
       // Add to mock database (in real app, this would be saved to backend)
       mockUsers.push(newUser);
-      
+
       setUser(newUser);
       localStorage.setItem("aiblog_user", JSON.stringify(newUser));
     } catch (error) {
@@ -180,8 +188,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     try {
       // Simulate OAuth flow
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+
       // Mock OAuth response
       const mockOAuthUser = {
         google: {
@@ -190,16 +198,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
           username: "googleuser",
           email: "user@gmail.com",
           avatar: "https://lh3.googleusercontent.com/a/default-user",
-          provider: "google"
+          provider: "google",
         },
         github: {
           id: `github-${Date.now()}`,
-          name: "GitHub User", 
+          name: "GitHub User",
           username: "githubuser",
           email: "user@github.com",
           avatar: "https://avatars.githubusercontent.com/u/1?v=4",
-          provider: "github"
-        }
+          provider: "github",
+        },
       }[provider];
 
       const newUser: User = {
@@ -207,9 +215,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         role: "user",
         bio: "",
         socialLinks: {},
-        joinedAt: new Date().toISOString().split('T')[0],
+        joinedAt: new Date().toISOString().split("T")[0],
         articlesCount: 0,
-        followersCount: 0
+        followersCount: 0,
       };
 
       setUser(newUser);
@@ -223,12 +231,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const updateUser = async (updates: Partial<User>) => {
     if (!user) return;
-    
+
     setIsLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       const updatedUser = { ...user, ...updates };
       setUser(updatedUser);
       localStorage.setItem("aiblog_user", JSON.stringify(updatedUser));
@@ -255,9 +263,5 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAuthenticated: !!user,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

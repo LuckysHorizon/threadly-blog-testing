@@ -10,11 +10,11 @@ interface PlaceholderPageProps {
   suggestedAction?: string;
 }
 
-export default function PlaceholderPage({ 
-  title, 
-  description, 
+export default function PlaceholderPage({
+  title,
+  description,
   icon = <Construction className="h-12 w-12 text-brand-400" />,
-  suggestedAction = "Continue exploring our homepage for now, or let us know what you'd like to see on this page!"
+  suggestedAction = "Continue exploring our homepage for now, or let us know what you'd like to see on this page!",
 }: PlaceholderPageProps) {
   return (
     <div className="min-h-screen py-20 px-4 sm:px-6 lg:px-8">
@@ -22,7 +22,10 @@ export default function PlaceholderPage({
         {/* Back Button */}
         <div className="mb-8">
           <Link to="/">
-            <Button variant="outline" className="glass-button text-white border-white/20 hover:bg-white/10">
+            <Button
+              variant="outline"
+              className="glass-button text-white border-white/20 hover:bg-white/10"
+            >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
@@ -38,9 +41,7 @@ export default function PlaceholderPage({
             </div>
 
             {/* Title */}
-            <h1 className="text-4xl font-bold text-white mb-4">
-              {title}
-            </h1>
+            <h1 className="text-4xl font-bold text-white mb-4">{title}</h1>
 
             {/* Description */}
             <p className="text-gray-300 text-lg mb-8 leading-relaxed">
@@ -57,9 +58,7 @@ export default function PlaceholderPage({
             </div>
 
             {/* Suggested Action */}
-            <p className="text-gray-400 mb-8">
-              {suggestedAction}
-            </p>
+            <p className="text-gray-400 mb-8">{suggestedAction}</p>
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -71,7 +70,7 @@ export default function PlaceholderPage({
                   Explore Homepage
                 </Button>
               </Link>
-              
+
               <Button
                 size="lg"
                 variant="outline"

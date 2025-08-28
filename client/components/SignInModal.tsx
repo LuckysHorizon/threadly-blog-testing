@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { X, Mail, Lock, Github, Chrome, Eye, EyeOff, User, AtSign, AlertCircle } from "lucide-react";
+import {
+  X,
+  Mail,
+  Lock,
+  Github,
+  Chrome,
+  Eye,
+  EyeOff,
+  User,
+  AtSign,
+  AlertCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -19,7 +30,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  
+
   const { signIn, signUp, signInWithProvider, isLoading } = useAuth();
 
   const resetForm = () => {
@@ -41,7 +52,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
     e.preventDefault();
     setError("");
     setSuccess("");
-    
+
     try {
       if (mode === "signin") {
         await signIn(email, password);
@@ -67,7 +78,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
           setError("Password must be at least 6 characters");
           return;
         }
-        
+
         await signUp({ email, password, name, username });
         setSuccess("Account created successfully! Welcome to AI Blog!");
         setTimeout(() => {
@@ -105,11 +116,11 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={handleClose}
       />
-      
+
       {/* Modal */}
       <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="glass-card p-6 sm:p-8">
@@ -131,10 +142,19 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
           {/* Demo Credentials - Only show in signin mode */}
           {mode === "signin" && (
             <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-brand-500/10 to-purple-500/10 border border-brand-400/20">
-              <p className="text-sm text-brand-300 font-medium mb-2">Demo Credentials:</p>
+              <p className="text-sm text-brand-300 font-medium mb-2">
+                Demo Credentials:
+              </p>
               <div className="text-xs text-gray-300 space-y-1">
-                <p>User: <span className="text-brand-400">user@aiblog.com</span> / password123</p>
-                <p>Admin: <span className="text-brand-400">admin@aiblog.com</span> / password123</p>
+                <p>
+                  User: <span className="text-brand-400">user@aiblog.com</span>{" "}
+                  / password123
+                </p>
+                <p>
+                  Admin:{" "}
+                  <span className="text-brand-400">admin@aiblog.com</span> /
+                  password123
+                </p>
               </div>
             </div>
           )}
@@ -150,7 +170,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
               <Chrome className="h-5 w-5 mr-3" />
               Continue with Google
             </Button>
-            
+
             <Button
               variant="outline"
               className="w-full glass-button text-white border-white/20 hover:bg-white/10"
@@ -168,7 +188,9 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
               <div className="w-full border-t border-white/10" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-background px-4 text-gray-400">or continue with email</span>
+              <span className="bg-background px-4 text-gray-400">
+                or continue with email
+              </span>
             </div>
           </div>
 
@@ -205,7 +227,11 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
                   <input
                     type="text"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    onChange={(e) =>
+                      setUsername(
+                        e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""),
+                      )
+                    }
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 backdrop-blur-xl"
                     placeholder="Choose a username"
                     required={mode === "signup"}
@@ -258,7 +284,11 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -357,9 +387,13 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
           <div className="mt-4 text-center">
             <p className="text-xs text-gray-500">
               By continuing, you agree to our{" "}
-              <a href="#" className="text-brand-400 hover:text-brand-300">Terms of Service</a>{" "}
+              <a href="#" className="text-brand-400 hover:text-brand-300">
+                Terms of Service
+              </a>{" "}
               and{" "}
-              <a href="#" className="text-brand-400 hover:text-brand-300">Privacy Policy</a>
+              <a href="#" className="text-brand-400 hover:text-brand-300">
+                Privacy Policy
+              </a>
             </p>
           </div>
         </div>

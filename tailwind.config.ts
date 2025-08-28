@@ -102,17 +102,24 @@ export default {
         "3xl": "40px",
       },
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'glass-gradient': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
-        'dark-glass-gradient': 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gradient-conic":
+          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        "glass-gradient":
+          "linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)",
+        "dark-glass-gradient":
+          "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)",
       },
       boxShadow: {
-        'glass': '0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-        'glass-lg': '0 16px 64px rgba(0, 0, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
-        'glass-xl': '0 24px 96px rgba(0, 0, 0, 0.2), 0 12px 48px rgba(0, 0, 0, 0.15), inset 0 2px 0 rgba(255, 255, 255, 0.2)',
-        'glow': '0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.2)',
-        'glow-lg': '0 0 40px rgba(139, 92, 246, 0.4), 0 0 80px rgba(139, 92, 246, 0.3)',
+        glass:
+          "0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+        "glass-lg":
+          "0 16px 64px rgba(0, 0, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
+        "glass-xl":
+          "0 24px 96px rgba(0, 0, 0, 0.2), 0 12px 48px rgba(0, 0, 0, 0.15), inset 0 2px 0 rgba(255, 255, 255, 0.2)",
+        glow: "0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.2)",
+        "glow-lg":
+          "0 0 40px rgba(139, 92, 246, 0.4), 0 0 80px rgba(139, 92, 246, 0.3)",
       },
       keyframes: {
         "accordion-down": {
@@ -131,7 +138,7 @@ export default {
             height: "0",
           },
         },
-        "float": {
+        float: {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-10px)" },
         },
@@ -139,7 +146,7 @@ export default {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.5" },
         },
-        "shimmer": {
+        shimmer: {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" },
         },
@@ -147,9 +154,9 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "float": "float 6s ease-in-out infinite",
+        float: "float 6s ease-in-out infinite",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
-        "shimmer": "shimmer 2s linear infinite",
+        shimmer: "shimmer 2s linear infinite",
       },
     },
   },
