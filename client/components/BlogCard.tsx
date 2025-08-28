@@ -1,24 +1,6 @@
 import { Clock, User, ArrowRight, Eye, Heart, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-
-interface BlogPost {
-  id: string;
-  title: string;
-  excerpt: string;
-  author: string;
-  authorAvatar: string;
-  publishedAt: string;
-  readTime: string;
-  category: string;
-  coverImage: string;
-  tags: string[];
-  stats: {
-    views: number;
-    likes: number;
-    comments: number;
-  };
-  featured?: boolean;
-}
+import { BlogPost, getAuthorById } from "@/lib/mockData";
 
 interface BlogCardProps {
   post: BlogPost;
