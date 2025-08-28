@@ -66,12 +66,12 @@ export default function BlogCard({ post, variant = "default" }: BlogCardProps) {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <img
-                  src={post.authorAvatar}
-                  alt={post.author}
+                  src={author.avatar}
+                  alt={author.name}
                   className="w-8 h-8 rounded-full border border-white/20"
                 />
                 <div>
-                  <p className="text-white text-sm font-medium">{post.author}</p>
+                  <p className="text-white text-sm font-medium">{author.name}</p>
                   <div className="flex items-center text-gray-400 text-xs space-x-2">
                     <span>{post.publishedAt}</span>
                     <span>•</span>
