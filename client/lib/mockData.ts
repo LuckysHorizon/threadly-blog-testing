@@ -113,8 +113,7 @@ export const mockBlogPosts: BlogPost[] = [
     id: "1",
     title: "The Future of Artificial Intelligence: Transforming Industries in 2024",
     excerpt: "Explore how AI is revolutionizing healthcare, finance, and education with cutting-edge applications and real-world implementations.",
-    author: "Dr. Sarah Chen",
-    authorAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b5bb?w=100&h=100&fit=crop&crop=face",
+    authorId: "admin-1",
     publishedAt: "2 days ago",
     readTime: "8 min read",
     category: "AI Technology",
@@ -125,14 +124,14 @@ export const mockBlogPosts: BlogPost[] = [
       likes: 1240,
       comments: 89
     },
-    featured: true
+    featured: true,
+    status: "published"
   },
   {
     id: "2",
     title: "Machine Learning Algorithms Explained: A Comprehensive Guide",
     excerpt: "Deep dive into the most important ML algorithms every data scientist should know, with practical examples and implementation tips.",
-    author: "Alex Rodriguez",
-    authorAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+    authorId: "user-1",
     publishedAt: "4 days ago",
     readTime: "12 min read",
     category: "Machine Learning",
@@ -143,14 +142,14 @@ export const mockBlogPosts: BlogPost[] = [
       likes: 720,
       comments: 45
     },
-    featured: true
+    featured: true,
+    status: "published"
   },
   {
     id: "3",
     title: "ChatGPT vs Claude vs Gemini: The Ultimate AI Assistant Comparison",
     excerpt: "An in-depth analysis of the leading AI assistants, comparing their capabilities, strengths, and ideal use cases.",
-    author: "Emma Thompson",
-    authorAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+    authorId: "user-2",
     publishedAt: "1 week ago",
     readTime: "10 min read",
     category: "AI Comparison",
@@ -161,14 +160,14 @@ export const mockBlogPosts: BlogPost[] = [
       likes: 1890,
       comments: 156
     },
-    featured: true
+    featured: true,
+    status: "published"
   },
   {
     id: "4",
     title: "Building Your First Neural Network with PyTorch",
     excerpt: "Step-by-step tutorial for beginners to create and train their first neural network using PyTorch framework.",
-    author: "Michael Zhang",
-    authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+    authorId: "user-3",
     publishedAt: "1 week ago",
     readTime: "15 min read",
     category: "Deep Learning",
@@ -178,14 +177,14 @@ export const mockBlogPosts: BlogPost[] = [
       views: 12500,
       likes: 980,
       comments: 67
-    }
+    },
+    status: "published"
   },
   {
     id: "5",
     title: "AI Ethics: Navigating the Challenges of Responsible AI Development",
     excerpt: "Understanding the ethical implications of AI technology and frameworks for building responsible AI systems.",
-    author: "Dr. Jennifer Lewis",
-    authorAvatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=face",
+    authorId: "admin-1",
     publishedAt: "2 weeks ago",
     readTime: "9 min read",
     category: "AI Ethics",
@@ -195,14 +194,14 @@ export const mockBlogPosts: BlogPost[] = [
       views: 7200,
       likes: 540,
       comments: 32
-    }
+    },
+    status: "published"
   },
   {
     id: "6",
     title: "Computer Vision in Healthcare: Revolutionizing Medical Diagnosis",
     excerpt: "How computer vision and AI are transforming medical imaging and improving diagnostic accuracy in healthcare.",
-    author: "Dr. Robert Kim",
-    authorAvatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face",
+    authorId: "user-1",
     publishedAt: "2 weeks ago",
     readTime: "11 min read",
     category: "Healthcare AI",
@@ -212,14 +211,14 @@ export const mockBlogPosts: BlogPost[] = [
       views: 9800,
       likes: 670,
       comments: 41
-    }
+    },
+    status: "published"
   },
   {
     id: "7",
     title: "Natural Language Processing: From BERT to GPT-4",
     excerpt: "The evolution of NLP models and their impact on how machines understand and generate human language.",
-    author: "Lisa Wang",
-    authorAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b5bb?w=100&h=100&fit=crop&crop=face",
+    authorId: "user-2",
     publishedAt: "3 weeks ago",
     readTime: "13 min read",
     category: "NLP",
@@ -229,14 +228,14 @@ export const mockBlogPosts: BlogPost[] = [
       views: 14200,
       likes: 1100,
       comments: 78
-    }
+    },
+    status: "published"
   },
   {
     id: "8",
     title: "Quantum Computing Meets AI: The Next Frontier",
     excerpt: "Exploring the intersection of quantum computing and artificial intelligence, and what it means for the future.",
-    author: "Dr. Paul Anderson",
-    authorAvatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
+    authorId: "user-3",
     publishedAt: "1 month ago",
     readTime: "14 min read",
     category: "Quantum AI",
@@ -246,7 +245,44 @@ export const mockBlogPosts: BlogPost[] = [
       views: 6700,
       likes: 420,
       comments: 28
-    }
+    },
+    status: "published"
+  },
+  // Draft posts (visible only to authors and admins)
+  {
+    id: "draft-1",
+    title: "Advanced Reinforcement Learning Techniques",
+    excerpt: "Exploring cutting-edge RL algorithms and their applications in robotics and game AI.",
+    authorId: "user-1",
+    publishedAt: "Draft",
+    readTime: "16 min read",
+    category: "Reinforcement Learning",
+    coverImage: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=800&h=400&fit=crop",
+    tags: ["Reinforcement Learning", "Robotics", "Game AI"],
+    stats: {
+      views: 0,
+      likes: 0,
+      comments: 0
+    },
+    status: "draft"
+  },
+  // Pending posts (waiting for admin approval)
+  {
+    id: "pending-1",
+    title: "Edge AI: Bringing Intelligence to IoT Devices",
+    excerpt: "How edge computing is revolutionizing AI deployment in Internet of Things applications.",
+    authorId: "user-2",
+    publishedAt: "Pending Review",
+    readTime: "11 min read",
+    category: "Edge Computing",
+    coverImage: "https://images.unsplash.com/photo-1518709268805-4e9042af2d39?w=800&h=400&fit=crop",
+    tags: ["Edge AI", "IoT", "Edge Computing"],
+    stats: {
+      views: 0,
+      likes: 0,
+      comments: 0
+    },
+    status: "pending"
   }
 ];
 
