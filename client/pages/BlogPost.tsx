@@ -126,12 +126,22 @@ export default function BlogPost() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-4">
               <img
-                src={post.authorAvatar}
-                alt={post.author}
+                src={author.avatar}
+                alt={author.name}
                 className="w-12 h-12 rounded-full border-2 border-white/20"
               />
               <div>
-                <p className="text-white font-semibold">{post.author}</p>
+                <div className="flex items-center space-x-2">
+                  <p className="text-white font-semibold">{author.name}</p>
+                  <span className={`px-2 py-0.5 rounded-full text-xs ${
+                    author.role === 'admin'
+                      ? 'bg-yellow-500/20 text-yellow-400'
+                      : 'bg-blue-500/20 text-blue-400'
+                  }`}>
+                    {author.role}
+                  </span>
+                </div>
+                <p className="text-gray-400 text-sm">@{author.username}</p>
                 <div className="flex items-center text-gray-400 text-sm space-x-4">
                   <span className="flex items-center">
                     <Calendar className="h-4 w-4 mr-1" />
