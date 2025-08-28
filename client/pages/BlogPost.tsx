@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { 
-  ArrowLeft, Calendar, Clock, Eye, Heart, MessageCircle, Share2, 
-  Bookmark, User, ChevronRight, ThumbsUp, Reply, MoreHorizontal 
+import {
+  ArrowLeft, Calendar, Clock, Eye, Heart, MessageCircle, Share2,
+  Bookmark, User, ChevronRight, ThumbsUp, Reply, MoreHorizontal
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BlogCard from "@/components/BlogCard";
-import { mockBlogPosts } from "@/lib/mockData";
+import { mockBlogPosts, getAuthorById } from "@/lib/mockData";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function BlogPost() {
