@@ -1,5 +1,6 @@
 import { Clock, User, ArrowRight, Eye, Heart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface BlogPost {
   id: string;
