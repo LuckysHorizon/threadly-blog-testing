@@ -29,48 +29,50 @@ export default function Index() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
             {/* Hero Badge */}
-            <div className="inline-flex items-center space-x-2 glass-nav mb-8 animate-float">
-              <Sparkles className="h-4 w-4 text-brand-400" />
-              <span className="text-sm font-medium text-gray-300">
+            <div className="inline-flex items-center space-x-2 glass-nav mb-6 sm:mb-8 animate-float px-3 py-2">
+              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-brand-400" />
+              <span className="text-xs sm:text-sm font-medium text-gray-300">
                 Powered by Advanced AI Technology
               </span>
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 leading-tight">
               <span className="text-white block">Discover</span>
-              <span className="text-gradient block">{typedText}</span>
+              <span className="text-gradient block min-h-[1.2em]">{typedText}</span>
               <span className="text-white block">Today</span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
+            <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-2xl lg:max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed px-4 sm:px-0">
               Explore cutting-edge insights, tutorials, and breakthrough discoveries in artificial intelligence.
               Join thousands of researchers, developers, and AI enthusiasts shaping the future.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-16">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0 shadow-glow px-8 py-4 text-lg font-semibold"
-              >
-                <BookOpen className="h-5 w-5 mr-2" />
-                Start Reading
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 mb-12 sm:mb-16 px-4 sm:px-0">
+              <Link to="/blogs">
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0 shadow-glow px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold"
+                >
+                  <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                  Start Reading
+                  <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
+                </Button>
+              </Link>
 
               <Button
                 size="lg"
                 variant="outline"
-                className="glass-button px-8 py-4 text-lg font-semibold text-white border-white/20 hover:bg-white/10"
+                className="w-full sm:w-auto glass-button px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold text-white border-white/20 hover:bg-white/10"
               >
-                <Brain className="h-5 w-5 mr-2" />
+                <Brain className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Explore AI Tools
               </Button>
             </div>
