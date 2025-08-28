@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Search, Menu, X, User, LogIn, Brain, Sparkles } from "lucide-react";
+import { Search, Menu, X, User, LogIn, Brain, Sparkles, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import SignInModal from "./SignInModal";
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
