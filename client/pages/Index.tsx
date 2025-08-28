@@ -121,29 +121,29 @@ export default function Index() {
       </section>
 
       {/* Categories Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">Explore by Category</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">Explore by Category</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base">
               Dive deep into specific areas of AI and machine learning with our curated collections
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {mockCategories.map((category, index) => (
               <Link
                 key={index}
                 to={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
-                className="group glass-card p-6 text-center hover:shadow-glass-lg transition-all duration-300 hover:-translate-y-1"
+                className="group glass-card p-4 sm:p-6 text-center hover:shadow-glass-lg transition-all duration-300 hover:-translate-y-1"
               >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${category.color} mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                  <Zap className="h-6 w-6 text-white" />
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg sm:rounded-xl bg-gradient-to-r ${category.color} mx-auto mb-2 sm:mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                  <Zap className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
                 </div>
-                <h3 className="font-semibold text-white mb-1 group-hover:text-brand-400 transition-colors duration-300">
+                <h3 className="font-semibold text-white mb-1 group-hover:text-brand-400 transition-colors duration-300 text-xs sm:text-sm lg:text-base leading-tight">
                   {category.name}
                 </h3>
-                <p className="text-sm text-gray-400">{category.count} articles</p>
+                <p className="text-xs sm:text-sm text-gray-400">{category.count} articles</p>
               </Link>
             ))}
           </div>
