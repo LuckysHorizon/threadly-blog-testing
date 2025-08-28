@@ -18,7 +18,25 @@ export default function BlogPost() {
   
   // Find the blog post
   const post = mockBlogPosts.find(p => p.id === id) || mockBlogPosts[0];
+  const author = getAuthorById(post.authorId);
   const relatedPosts = mockBlogPosts.filter(p => p.id !== post.id && p.category === post.category).slice(0, 3);
+
+  // If author not found, show error
+  if (!author) {
+    return (
+      <div className="min-h-screen py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Author Not Found</h1>
+          <p className="text-gray-400 mb-8">The author of this post could not be found.</p>
+          <Link to="/blogs">
+            <Button className="bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0">
+              Back to Articles
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   // Mock comments data
   const mockComments = [
