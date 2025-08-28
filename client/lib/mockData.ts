@@ -1,13 +1,29 @@
 // Mock data for the AI Blog Website
 
+export interface Author {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  avatar: string;
+  bio: string;
+  role: "admin" | "user";
+  socialLinks?: {
+    twitter?: string;
+    github?: string;
+    linkedin?: string;
+  };
+  joinedAt: string;
+  articlesCount: number;
+  followersCount: number;
+}
+
 export interface BlogPost {
   id: string;
   title: string;
   excerpt: string;
   content?: string;
-  author: string;
-  authorAvatar: string;
-  authorBio?: string;
+  authorId: string;
   publishedAt: string;
   readTime: string;
   category: string;
@@ -21,6 +37,76 @@ export interface BlogPost {
   featured?: boolean;
   status?: "published" | "draft" | "pending";
 }
+
+// Mock authors database
+export const mockAuthors: Author[] = [
+  {
+    id: "admin-1",
+    name: "Dr. Sarah Chen",
+    username: "sarahchen",
+    email: "admin@aiblog.com",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b5bb?w=100&h=100&fit=crop&crop=face",
+    role: "admin",
+    bio: "AI Researcher at Stanford University, specializing in machine learning and neural networks.",
+    socialLinks: {
+      twitter: "https://twitter.com/sarahchen",
+      github: "https://github.com/sarahchen"
+    },
+    joinedAt: "2023-01-15",
+    articlesCount: 12,
+    followersCount: 15400
+  },
+  {
+    id: "user-1",
+    name: "Alex Rodriguez",
+    username: "alexrod",
+    email: "user@aiblog.com",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+    role: "user",
+    bio: "Senior Data Scientist at Google, expert in machine learning algorithms and data analysis.",
+    socialLinks: {
+      linkedin: "https://linkedin.com/in/alexrodriguez"
+    },
+    joinedAt: "2023-03-20",
+    articlesCount: 8,
+    followersCount: 9800
+  },
+  {
+    id: "user-2",
+    name: "Emma Thompson",
+    username: "emmathompson",
+    email: "emma@aiblog.com",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+    role: "user",
+    bio: "AI Product Manager at OpenAI, passionate about making AI accessible to everyone.",
+    socialLinks: {
+      twitter: "https://twitter.com/emmathompson"
+    },
+    joinedAt: "2023-02-10",
+    articlesCount: 15,
+    followersCount: 22100
+  },
+  {
+    id: "user-3",
+    name: "Michael Zhang",
+    username: "michaelzhang",
+    email: "michael@aiblog.com",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+    role: "user",
+    bio: "Machine Learning Engineer with expertise in PyTorch and deep learning frameworks.",
+    socialLinks: {
+      github: "https://github.com/michaelzhang"
+    },
+    joinedAt: "2023-04-05",
+    articlesCount: 6,
+    followersCount: 5200
+  }
+];
+
+// Helper function to get author by ID
+export const getAuthorById = (authorId: string): Author | undefined => {
+  return mockAuthors.find(author => author.id === authorId);
+};
 
 export const mockBlogPosts: BlogPost[] = [
   {
