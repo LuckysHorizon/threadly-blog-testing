@@ -58,7 +58,10 @@ export default function BlogPost() {
   }
 
   const { comments, getByBlogId, addComment } = useComments();
-  const blogComments = useMemo(() => getByBlogId(post.id), [comments, post.id, getByBlogId]);
+  const blogComments = useMemo(
+    () => getByBlogId(post.id),
+    [comments, post.id, getByBlogId],
+  );
 
   // Mock comments data (removed)
   const mockComments = [
@@ -356,7 +359,11 @@ export default function BlogPost() {
                       disabled={!comment.trim()}
                       onClick={() => {
                         if (!user) return;
-                        addComment({ blogId: post.id, authorId: user.id, content: comment });
+                        addComment({
+                          blogId: post.id,
+                          authorId: user.id,
+                          content: comment,
+                        });
                         setComment("");
                       }}
                       className="bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0"
@@ -383,41 +390,45 @@ export default function BlogPost() {
             {blogComments.map((c) => {
               const cAuthor = getAuthorById(c.authorId);
               return (
-              <div key={c.id} className="space-y-4">
-                <div className="flex items-start space-x-4">
-                  <img
-                    src={cAuthor?.avatar}
-                    alt={cAuthor?.name}
-                    className="w-10 h-10 rounded-full border border-white/20"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <p className="text-white font-medium">{cAuthor?.name}</p>
-                      <span className="text-gray-400 text-sm">
-                        {new Date(c.createdAt).toLocaleString()}
-                      </span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${c.status === "approved" ? "bg-green-500/20 text-green-400" : c.status === "pending" ? "bg-yellow-500/20 text-yellow-400" : "bg-red-500/20 text-red-400"}`}>
-                        {c.status}
-                      </span>
-                    </div>
-                    <p className="text-gray-300 mb-3">{c.content}</p>
-                    <div className="flex items-center space-x-4">
-                      <button className="flex items-center space-x-1 text-gray-400 hover:text-brand-400 transition-colors duration-200">
-                        <ThumbsUp className="h-4 w-4" />
-                      </button>
-                      <button className="flex items-center space-x-1 text-gray-400 hover:text-white transition-colors duration-200">
-                        <Reply className="h-4 w-4" />
-                        <span className="text-sm">Reply</span>
-                      </button>
-                      <button className="text-gray-400 hover:text-white transition-colors duration-200">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
+                <div key={c.id} className="space-y-4">
+                  <div className="flex items-start space-x-4">
+                    <img
+                      src={cAuthor?.avatar}
+                      alt={cAuthor?.name}
+                      className="w-10 h-10 rounded-full border border-white/20"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <p className="text-white font-medium">
+                          {cAuthor?.name}
+                        </p>
+                        <span className="text-gray-400 text-sm">
+                          {new Date(c.createdAt).toLocaleString()}
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs ${c.status === "approved" ? "bg-green-500/20 text-green-400" : c.status === "pending" ? "bg-yellow-500/20 text-yellow-400" : "bg-red-500/20 text-red-400"}`}
+                        >
+                          {c.status}
+                        </span>
+                      </div>
+                      <p className="text-gray-300 mb-3">{c.content}</p>
+                      <div className="flex items-center space-x-4">
+                        <button className="flex items-center space-x-1 text-gray-400 hover:text-brand-400 transition-colors duration-200">
+                          <ThumbsUp className="h-4 w-4" />
+                        </button>
+                        <button className="flex items-center space-x-1 text-gray-400 hover:text-white transition-colors duration-200">
+                          <Reply className="h-4 w-4" />
+                          <span className="text-sm">Reply</span>
+                        </button>
+                        <button className="text-gray-400 hover:text-white transition-colors duration-200">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-
-              </div>
-            );})}
+              );
+            })}
           </div>
         </div>
 

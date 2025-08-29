@@ -48,12 +48,16 @@ export default function Layout({ children }: LayoutProps) {
               <div className="flex items-center space-x-2 mb-4">
                 <div className="p-1.5 rounded-xl bg-white/5 border border-white/10">
                   <img
-                    src={"https://cdn.builder.io/api/v1/image/assets%2F945110ca98a745c1b72f359aa559f018%2F0cb2dab15ff946b9ac7237fb5eb05818?format=webp&width=128"}
+                    src={
+                      "https://cdn.builder.io/api/v1/image/assets%2F945110ca98a745c1b72f359aa559f018%2F0cb2dab15ff946b9ac7237fb5eb05818?format=webp&width=128"
+                    }
                     alt="Threadly logo"
                     className="h-8 w-8 rounded-lg object-contain"
                   />
                 </div>
-                <span className="text-xl font-bold text-gradient">Threadly</span>
+                <span className="text-xl font-bold text-gradient">
+                  Threadly
+                </span>
               </div>
               <p className="text-gray-400 max-w-md mb-4">
                 The future of content creation powered by artificial
@@ -112,7 +116,8 @@ export default function Layout({ children }: LayoutProps) {
 
           <div className="border-t border-white/10 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2025 Threadly. All rights reserved. Built by LuckysHorizon and Manikanta boda.
+              © 2025 Threadly. All rights reserved. Built by LuckysHorizon and
+              Manikanta boda.
             </p>
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <span className="text-gray-500 text-sm">Follow us:</span>

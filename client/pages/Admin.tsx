@@ -24,12 +24,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  mockAuthors,
-  getAuthorById,
-  Author,
-  BlogPost,
-} from "@/lib/mockData";
+import { mockAuthors, getAuthorById, Author, BlogPost } from "@/lib/mockData";
 import { usePosts } from "@/contexts/PostsContext";
 import { useComments } from "@/contexts/CommentsContext";
 
@@ -68,12 +63,27 @@ export default function Admin() {
 
   const renderMarkdown = (text: string) =>
     text
-      .replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold text-white mt-4 mb-2">$1<\/h3>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold text-white mt-5 mb-3">$1<\/h2>')
-      .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-white mt-6 mb-4">$1<\/h1>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1<\/strong>')
+      .replace(
+        /^### (.*$)/gim,
+        '<h3 class="text-lg font-bold text-white mt-4 mb-2">$1<\/h3>',
+      )
+      .replace(
+        /^## (.*$)/gim,
+        '<h2 class="text-xl font-bold text-white mt-5 mb-3">$1<\/h2>',
+      )
+      .replace(
+        /^# (.*$)/gim,
+        '<h1 class="text-2xl font-bold text-white mt-6 mb-4">$1<\/h1>',
+      )
+      .replace(
+        /\*\*(.*?)\*\*/g,
+        '<strong class="font-bold text-white">$1<\/strong>',
+      )
       .replace(/\*(.*?)\*/g, '<em class="italic">$1<\/em>')
-      .replace(/`(.*?)`/g, '<code class="bg-gray-800 px-1 py-0.5 rounded text-brand-400">$1<\/code>')
+      .replace(
+        /`(.*?)`/g,
+        '<code class="bg-gray-800 px-1 py-0.5 rounded text-brand-400">$1<\/code>',
+      )
       .replace(/\n/g, "<br>");
 
   // Redirect if not admin
@@ -136,7 +146,9 @@ export default function Admin() {
       deletePost(blogId);
       return;
     }
-    updatePost(blogId, { status: action === "approve" ? "published" : "draft" });
+    updatePost(blogId, {
+      status: action === "approve" ? "published" : "draft",
+    });
   };
 
   // Handle comment actions
@@ -175,8 +187,10 @@ export default function Admin() {
     const q = searchQuery.toLowerCase();
     const post = blogs.find((b) => b.id === comment.blogId);
     const blogTitle = post?.title?.toLowerCase() ?? "";
-    const matchesSearch = comment.content.toLowerCase().includes(q) || blogTitle.includes(q);
-    const matchesStatus = filterStatus === "all" || comment.status === filterStatus;
+    const matchesSearch =
+      comment.content.toLowerCase().includes(q) || blogTitle.includes(q);
+    const matchesStatus =
+      filterStatus === "all" || comment.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
@@ -628,7 +642,8 @@ export default function Admin() {
                           <p className="text-gray-400 text-xs">
                             On:{" "}
                             <span className="text-brand-400">
-                              {blogs.find((b) => b.id === comment.blogId)?.title ?? "Unknown"}
+                              {blogs.find((b) => b.id === comment.blogId)
+                                ?.title ?? "Unknown"}
                             </span>
                           </p>
                         </div>
@@ -847,37 +862,72 @@ export default function Admin() {
             </div>
           </div>
         )}
-      {/* Preview Modal */}
-      {previewPost && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setPreviewPost(null)} />
-          <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto glass-card">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-white">{previewPost.title}</h2>
-                <p className="text-gray-400 text-sm">Category: {previewPost.category} • Status: {previewPost.status}</p>
-              </div>
-              <button onClick={() => setPreviewPost(null)} className="text-gray-400 hover:text-white">✕</button>
-            </div>
-            {previewPost.coverImage && (
-              <img src={previewPost.coverImage} alt="cover" className="w-full h-56 object-cover rounded-xl mb-4" />
-            )}
-            {previewPost.excerpt && (
-              <p className="text-gray-300 mb-4">{previewPost.excerpt}</p>
-            )}
+        {/* Preview Modal */}
+        {previewPost && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div
-              className="prose prose-invert max-w-none text-gray-300"
-              dangerouslySetInnerHTML={{ __html: renderMarkdown(previewPost.content) }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setPreviewPost(null)}
             />
-            {previewPost.status === "pending" && (
-              <div className="mt-6 flex items-center justify-end space-x-2">
-                <Button onClick={() => { handleBlogAction(previewPost.id, "reject"); setPreviewPost(null); }} className="bg-red-600 hover:bg-red-700 text-white">Reject</Button>
-                <Button onClick={() => { handleBlogAction(previewPost.id, "approve"); setPreviewPost(null); }} className="bg-green-600 hover:bg-green-700 text-white">Approve</Button>
+            <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto glass-card">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">
+                    {previewPost.title}
+                  </h2>
+                  <p className="text-gray-400 text-sm">
+                    Category: {previewPost.category} • Status:{" "}
+                    {previewPost.status}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setPreviewPost(null)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </button>
               </div>
-            )}
+              {previewPost.coverImage && (
+                <img
+                  src={previewPost.coverImage}
+                  alt="cover"
+                  className="w-full h-56 object-cover rounded-xl mb-4"
+                />
+              )}
+              {previewPost.excerpt && (
+                <p className="text-gray-300 mb-4">{previewPost.excerpt}</p>
+              )}
+              <div
+                className="prose prose-invert max-w-none text-gray-300"
+                dangerouslySetInnerHTML={{
+                  __html: renderMarkdown(previewPost.content),
+                }}
+              />
+              {previewPost.status === "pending" && (
+                <div className="mt-6 flex items-center justify-end space-x-2">
+                  <Button
+                    onClick={() => {
+                      handleBlogAction(previewPost.id, "reject");
+                      setPreviewPost(null);
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Reject
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      handleBlogAction(previewPost.id, "approve");
+                      setPreviewPost(null);
+                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    Approve
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </main>
     </div>
   );

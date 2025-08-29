@@ -143,14 +143,18 @@ export default function Write() {
         publishedAt: "Pending Review",
         readTime: estimateReadTime(content),
         category,
-        coverImage: coverImage || "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop",
+        coverImage:
+          coverImage ||
+          "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop",
         tags,
         stats: { views: 0, likes: 0, comments: 0 },
         featured: false,
         status: "pending",
       });
 
-      setSuccess("Article submitted for review! You'll be notified when it's approved.");
+      setSuccess(
+        "Article submitted for review! You'll be notified when it's approved.",
+      );
       setIsDraft(false);
 
       // Clear draft from localStorage
@@ -254,7 +258,9 @@ export default function Write() {
             </Link>
 
             <div className="hidden sm:block">
-              <h1 className="text-lg sm:text-xl font-bold text-white">Write Article</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-white">
+                Write Article
+              </h1>
               {lastSaved && (
                 <p className="text-xs text-gray-400">
                   Last saved: {lastSaved.toLocaleTimeString()}
@@ -544,7 +550,8 @@ The content will auto-save every 5 seconds."
                       const file = e.target.files?.[0];
                       if (!file) return;
                       const reader = new FileReader();
-                      reader.onload = () => setCoverImage(String(reader.result));
+                      reader.onload = () =>
+                        setCoverImage(String(reader.result));
                       reader.readAsDataURL(file);
                     }}
                     className="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"

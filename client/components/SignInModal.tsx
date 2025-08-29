@@ -142,10 +142,13 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
           {/* Demo Credentials - Only show in signin mode */}
           {mode === "signin" && (
             <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-brand-500/10 to-purple-500/10 border border-brand-400/20">
-              <p className="text-sm text-brand-300 font-medium mb-2">Demo Credentials:</p>
+              <p className="text-sm text-brand-300 font-medium mb-2">
+                Demo Credentials:
+              </p>
               <div className="text-xs text-gray-300 space-y-1">
                 <p>
-                  User: <span className="text-brand-400">user@aiblog.com</span> / password123
+                  User: <span className="text-brand-400">user@aiblog.com</span>{" "}
+                  / password123
                 </p>
               </div>
             </div>

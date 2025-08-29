@@ -90,7 +90,9 @@ export default function Navigation() {
               <div className="absolute inset-0 bg-gradient-to-r from-brand-400 to-purple-400 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
               <div className="relative p-0.5 sm:p-1 rounded-xl bg-white/5 border border-white/10">
                 <img
-                  src={"https://cdn.builder.io/api/v1/image/assets%2F945110ca98a745c1b72f359aa559f018%2F0cb2dab15ff946b9ac7237fb5eb05818?format=webp&width=128"}
+                  src={
+                    "https://cdn.builder.io/api/v1/image/assets%2F945110ca98a745c1b72f359aa559f018%2F0cb2dab15ff946b9ac7237fb5eb05818?format=webp&width=128"
+                  }
                   alt="Threadly logo"
                   className="h-6 w-6 sm:h-8 sm:w-8 rounded-lg object-contain"
                 />

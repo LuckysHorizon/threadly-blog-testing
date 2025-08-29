@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { BlogPost } from "@/lib/mockData";
 import { mockBlogPosts } from "@/lib/mockData";
 
@@ -14,7 +20,9 @@ const PostsContext = createContext<PostsContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "aiblog_posts";
 
-export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [posts, setPosts] = useState<BlogPost[]>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -30,14 +38,17 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [posts]);
 
   const addPost: PostsContextValue["addPost"] = (post) => {
-    const id = post.id ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const id =
+      post.id ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const newPost: BlogPost = { ...post, id } as BlogPost;
     setPosts((prev) => [newPost, ...prev]);
     return id;
   };
 
   const updatePost: PostsContextValue["updatePost"] = (id, changes) => {
-    setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, ...changes } : p)));
+    setPosts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, ...changes } : p)),
+    );
   };
 
   const deletePost: PostsContextValue["deletePost"] = (id) => {
@@ -53,10 +64,12 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const value = useMemo(
     () => ({ posts, addPost, updatePost, deletePost, reloadFromStorage }),
-    [posts]
+    [posts],
   );
 
-  return <PostsContext.Provider value={value}>{children}</PostsContext.Provider>;
+  return (
+    <PostsContext.Provider value={value}>{children}</PostsContext.Provider>
+  );
 };
 
 export const usePosts = () => {
