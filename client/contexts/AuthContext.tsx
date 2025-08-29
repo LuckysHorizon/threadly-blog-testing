@@ -56,25 +56,8 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Mock user database
+// Mock user database (demo user only; admin is handled via secure env credentials)
 const mockUsers: User[] = [
-  {
-    id: "admin-1",
-    name: "Sarah Chen",
-    username: "sarahchen",
-    email: "admin@aiblog.com",
-    avatar:
-      "https://images.unsplash.com/photo-1494790108755-2616b612b5bb?w=100&h=100&fit=crop&crop=face",
-    role: "admin" as const,
-    bio: "AI Researcher at Stanford University, specializing in machine learning and neural networks.",
-    socialLinks: {
-      twitter: "https://twitter.com/sarahchen",
-      github: "https://github.com/sarahchen",
-    },
-    joinedAt: "2023-01-15",
-    articlesCount: 12,
-    followersCount: 15400,
-  },
   {
     id: "user-1",
     name: "Alex Rodriguez",
