@@ -61,6 +61,7 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [blogs, setBlogs] = useState<BlogPost[]>(mockBlogPosts);
 
   // Redirect if not admin
   useEffect(() => {
@@ -72,16 +73,12 @@ export default function Admin() {
   // Mock admin stats
   const adminStats: AdminStats = {
     totalUsers: mockAuthors.length,
-    totalBlogs: mockBlogPosts.length,
-    pendingBlogs: mockBlogPosts.filter((p) => p.status === "pending").length,
-    publishedBlogs: mockBlogPosts.filter((p) => p.status === "published")
-      .length,
-    totalViews: mockBlogPosts.reduce((sum, post) => sum + post.stats.views, 0),
-    totalLikes: mockBlogPosts.reduce((sum, post) => sum + post.stats.likes, 0),
-    totalComments: mockBlogPosts.reduce(
-      (sum, post) => sum + post.stats.comments,
-      0,
-    ),
+    totalBlogs: blogs.length,
+    pendingBlogs: blogs.filter((p) => p.status === "pending").length,
+    publishedBlogs: blogs.filter((p) => p.status === "published").length,
+    totalViews: blogs.reduce((sum, post) => sum + post.stats.views, 0),
+    totalLikes: blogs.reduce((sum, post) => sum + post.stats.likes, 0),
+    totalComments: blogs.reduce((sum, post) => sum + post.stats.comments, 0),
     newUsersThisMonth: 12,
   };
 
@@ -117,14 +114,24 @@ export default function Admin() {
     },
   ];
 
+  const [comments, setComments] = useState<Comment[]>(mockComments);
+
   // Handle blog actions
   const handleBlogAction = async (
     blogId: string,
     action: "approve" | "reject" | "delete",
   ) => {
-    // Simulate API call
-    console.log(`${action} blog ${blogId}`);
-    // In real app, this would update the database
+    if (action === "delete") {
+      setBlogs((prev) => prev.filter((b) => b.id !== blogId));
+      return;
+    }
+    setBlogs((prev) =>
+      prev.map((b) =>
+        b.id === blogId
+          ? { ...b, status: action === "approve" ? "published" : "draft" }
+          : b,
+      ),
+    );
   };
 
   // Handle comment actions
@@ -132,9 +139,17 @@ export default function Admin() {
     commentId: string,
     action: "approve" | "reject" | "delete",
   ) => {
-    // Simulate API call
-    console.log(`${action} comment ${commentId}`);
-    // In real app, this would update the database
+    if (action === "delete") {
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      return;
+    }
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === commentId
+          ? { ...c, status: action === "approve" ? "approved" : "rejected" }
+          : c,
+      ),
+    );
   };
 
   // Handle user actions
@@ -148,7 +163,7 @@ export default function Admin() {
   };
 
   // Filter data based on search and status
-  const filteredBlogs = mockBlogPosts.filter((blog) => {
+  const filteredBlogs = blogs.filter((blog) => {
     const matchesSearch = blog.title
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -157,7 +172,7 @@ export default function Admin() {
     return matchesSearch && matchesStatus;
   });
 
-  const filteredComments = mockComments.filter((comment) => {
+  const filteredComments = comments.filter((comment) => {
     const matchesSearch =
       comment.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       comment.blogTitle.toLowerCase().includes(searchQuery.toLowerCase());
@@ -311,7 +326,7 @@ export default function Admin() {
                   Pending Approvals
                 </h3>
                 <div className="space-y-3">
-                  {mockBlogPosts
+                  {blogs
                     .filter((p) => p.status === "pending")
                     .map((post) => {
                       const author = getAuthorById(post.authorId);
