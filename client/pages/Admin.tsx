@@ -524,6 +524,13 @@ export default function Admin() {
                           </td>
                           <td className="p-4">
                             <div className="flex items-center space-x-2">
+                              <Button
+                                size="sm"
+                                onClick={() => setPreviewPost(blog)}
+                                className="glass-button text-gray-300 hover:text-white px-2 py-1"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
                               {blog.status === "pending" && (
                                 <>
                                   <Button
