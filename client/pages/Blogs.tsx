@@ -88,7 +88,7 @@ export default function Blogs() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-            AI Blog <span className="text-gradient">Articles</span>
+            Threadly <span className="text-gradient">Articles</span>
           </h1>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
             Discover cutting-edge insights, tutorials, and research in
