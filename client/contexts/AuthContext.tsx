@@ -147,6 +147,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
+      const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || "admin@threadly.com";
+
+      // Prevent registering with admin email
+      if (data.email === ADMIN_EMAIL) {
+        throw new Error("Registration with reserved email is not allowed");
+      }
+
       // Check if user already exists
       const existingUser = mockUsers.find((u) => u.email === data.email);
       if (existingUser) {
