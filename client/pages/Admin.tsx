@@ -62,7 +62,8 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [blogs, setBlogs] = useState<BlogPost[]>(mockBlogPosts);
+  const { posts: blogs, updatePost, deletePost } = usePosts();
+  const { comments, moderateComment, deleteComment } = useComments();
 
   // Redirect if not admin
   useEffect(() => {
