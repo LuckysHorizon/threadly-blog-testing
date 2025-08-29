@@ -23,10 +23,10 @@ export default function Blogs() {
   const [sortBy, setSortBy] = useState<SortOption>("latest");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [showFilters, setShowFilters] = useState(false);
+  const { posts } = usePosts();
 
   // Filter and sort posts
   const filteredAndSortedPosts = useMemo(() => {
-    const { posts } = usePosts();
     let filtered = posts;
 
     // Filter by search query
@@ -73,7 +73,7 @@ export default function Blogs() {
     });
 
     return sorted;
-  }, [searchQuery, selectedCategory, sortBy]);
+  }, [posts, searchQuery, selectedCategory, sortBy]);
 
   const sortOptions = [
     { value: "latest", label: "Latest", icon: Clock },
