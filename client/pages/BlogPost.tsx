@@ -404,7 +404,6 @@ export default function BlogPost() {
                     <div className="flex items-center space-x-4">
                       <button className="flex items-center space-x-1 text-gray-400 hover:text-brand-400 transition-colors duration-200">
                         <ThumbsUp className="h-4 w-4" />
-                        <span className="text-sm">{comment.likes}</span>
                       </button>
                       <button className="flex items-center space-x-1 text-gray-400 hover:text-white transition-colors duration-200">
                         <Reply className="h-4 w-4" />
