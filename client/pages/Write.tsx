@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { mockCategories } from "@/lib/mockData";
+import { usePosts } from "@/contexts/PostsContext";
 
 export default function Write() {
   const { user, isAuthenticated } = useAuth();
@@ -43,6 +44,7 @@ export default function Write() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const { addPost } = usePosts();
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -115,6 +117,12 @@ export default function Write() {
     setTimeout(() => setSuccess(""), 3000);
   };
 
+  const estimateReadTime = (text: string) => {
+    const words = text.trim().split(/\s+/).length;
+    const minutes = Math.max(1, Math.round(words / 200));
+    return `${minutes} min read`;
+  };
+
   // Submit for review
   const handleSubmit = async () => {
     if (!title.trim() || !content.trim() || !category) {
@@ -127,17 +135,30 @@ export default function Write() {
       // Simulate submission
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      setSuccess(
-        "Article submitted for review! You'll be notified when it's approved.",
-      );
+      const newId = addPost({
+        title,
+        excerpt,
+        content,
+        authorId: user!.id,
+        publishedAt: "Pending Review",
+        readTime: estimateReadTime(content),
+        category,
+        coverImage: coverImage || "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop",
+        tags,
+        stats: { views: 0, likes: 0, comments: 0 },
+        featured: false,
+        status: "pending",
+      });
+
+      setSuccess("Article submitted for review! You'll be notified when it's approved.");
       setIsDraft(false);
 
       // Clear draft from localStorage
       localStorage.removeItem("aiblog_draft");
 
       setTimeout(() => {
-        navigate("/blogs");
-      }, 2000);
+        navigate(`/blog/${newId}`);
+      }, 1200);
     } catch (err) {
       setError("Failed to submit article");
     } finally {
@@ -513,13 +534,35 @@ The content will auto-save every 5 seconds."
               {/* Cover Image */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Cover Image URL
+                  Cover Image
                 </label>
+                <div className="flex items-center space-x-2 mb-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => setCoverImage(String(reader.result));
+                      reader.readAsDataURL(file);
+                    }}
+                    className="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCoverImage("")}
+                    className="glass-button text-white border-white/20 hover:bg-white/10"
+                  >
+                    Remove
+                  </Button>
+                </div>
                 <input
                   type="url"
                   value={coverImage}
                   onChange={(e) => setCoverImage(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
+                  placeholder="https://example.com/image.jpg or use file upload"
                   className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
                 {coverImage && (
