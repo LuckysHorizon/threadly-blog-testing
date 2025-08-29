@@ -28,8 +28,10 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Layout>
-            <Routes>
+          <PostsProvider>
+            <CommentsProvider>
+              <Layout>
+                <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/blogs" element={<Blogs />} />
               <Route path="/blog/:id" element={<BlogPost />} />
@@ -70,8 +72,10 @@ const App = () => (
               />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
+                </Routes>
+              </Layout>
+            </CommentsProvider>
+          </PostsProvider>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
