@@ -328,7 +328,7 @@ export default function BlogPost() {
         {/* Comments Section */}
         <div className="glass-card p-8 mb-8">
           <h2 className="text-2xl font-bold text-white mb-6">
-            Comments ({mockComments.length})
+            Comments ({blogComments.length})
           </h2>
 
           {/* Comment Form */}
@@ -354,6 +354,11 @@ export default function BlogPost() {
                     </p>
                     <Button
                       disabled={!comment.trim()}
+                      onClick={() => {
+                        if (!user) return;
+                        addComment({ blogId: post.id, authorId: user.id, content: comment });
+                        setComment("");
+                      }}
                       className="bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0"
                     >
                       Post Comment
@@ -375,22 +380,27 @@ export default function BlogPost() {
 
           {/* Comments List */}
           <div className="space-y-6">
-            {mockComments.map((comment) => (
-              <div key={comment.id} className="space-y-4">
+            {blogComments.map((c) => {
+              const cAuthor = getAuthorById(c.authorId);
+              return (
+              <div key={c.id} className="space-y-4">
                 <div className="flex items-start space-x-4">
                   <img
-                    src={comment.avatar}
-                    alt={comment.author}
+                    src={cAuthor?.avatar}
+                    alt={cAuthor?.name}
                     className="w-10 h-10 rounded-full border border-white/20"
                   />
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-2">
-                      <p className="text-white font-medium">{comment.author}</p>
+                      <p className="text-white font-medium">{cAuthor?.name}</p>
                       <span className="text-gray-400 text-sm">
-                        {comment.timestamp}
+                        {new Date(c.createdAt).toLocaleString()}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${c.status === "approved" ? "bg-green-500/20 text-green-400" : c.status === "pending" ? "bg-yellow-500/20 text-yellow-400" : "bg-red-500/20 text-red-400"}`}>
+                        {c.status}
                       </span>
                     </div>
-                    <p className="text-gray-300 mb-3">{comment.content}</p>
+                    <p className="text-gray-300 mb-3">{c.content}</p>
                     <div className="flex items-center space-x-4">
                       <button className="flex items-center space-x-1 text-gray-400 hover:text-brand-400 transition-colors duration-200">
                         <ThumbsUp className="h-4 w-4" />
@@ -407,47 +417,8 @@ export default function BlogPost() {
                   </div>
                 </div>
 
-                {/* Replies */}
-                {comment.replies && comment.replies.length > 0 && (
-                  <div className="ml-14 space-y-4">
-                    {comment.replies.map((reply) => (
-                      <div
-                        key={reply.id}
-                        className="flex items-start space-x-4"
-                      >
-                        <img
-                          src={reply.avatar}
-                          alt={reply.author}
-                          className="w-8 h-8 rounded-full border border-white/20"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <p className="text-white font-medium text-sm">
-                              {reply.author}
-                            </p>
-                            <span className="text-gray-400 text-xs">
-                              {reply.timestamp}
-                            </span>
-                          </div>
-                          <p className="text-gray-300 text-sm mb-2">
-                            {reply.content}
-                          </p>
-                          <div className="flex items-center space-x-3">
-                            <button className="flex items-center space-x-1 text-gray-400 hover:text-brand-400 transition-colors duration-200">
-                              <ThumbsUp className="h-3 w-3" />
-                              <span className="text-xs">{reply.likes}</span>
-                            </button>
-                            <button className="text-gray-400 hover:text-white transition-colors duration-200 text-xs">
-                              Reply
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
-            ))}
+            );})}
           </div>
         </div>
 
