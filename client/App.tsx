@@ -41,8 +41,8 @@ const App = () => (
                 path="/categories"
                 element={
                   <PlaceholderPage
-                    title="AI Categories"
-                    description="Explore our comprehensive collection of AI categories and topics. From machine learning to natural language processing, find exactly what you're looking for."
+                    title="Threadly Categories"
+                    description="Explore our comprehensive collection of categories and topics at Threadly. From machine learning to natural language processing, find exactly what you're looking for."
                     icon={<FolderOpen className="h-12 w-12 text-brand-400" />}
                     suggestedAction="We're building an advanced categorization system with filtering and sorting. Check out our featured articles on the homepage!"
                   />
@@ -63,10 +63,10 @@ const App = () => (
                 path="/about"
                 element={
                   <PlaceholderPage
-                    title="About AI Blog"
-                    description="Learn more about our mission to democratize AI knowledge and connect the global AI community through high-quality content and insights."
+                    title="About Threadly"
+                    description="Learn more about Threadly's mission to democratize knowledge and connect the global community through high-quality content and insights."
                     icon={<Info className="h-12 w-12 text-brand-400" />}
-                    suggestedAction="We're crafting our story and mission statement. For now, explore our latest AI insights and discoveries!"
+                    suggestedAction="We're crafting our story and mission statement. For now, explore our latest insights and discoveries!"
                   />
                 }
               />
