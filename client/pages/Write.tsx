@@ -239,9 +239,9 @@ export default function Write() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 glass-nav border-b border-white/10 px-4 sm:px-6 lg:px-8 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+      <header className="sticky top-0 z-40 glass-nav border-b border-white/10 px-4 sm:px-6 lg:px-8 py-3">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center space-x-3">
             <Link to="/blogs">
               <Button
                 variant="outline"
@@ -249,12 +249,12 @@ export default function Write() {
                 className="glass-button text-white border-white/20 hover:bg-white/10"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                <span className="hidden xs:inline">Back</span>
               </Button>
             </Link>
 
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-white">Write Article</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-white">Write Article</h1>
               {lastSaved && (
                 <p className="text-xs text-gray-400">
                   Last saved: {lastSaved.toLocaleTimeString()}
@@ -263,11 +263,11 @@ export default function Write() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center flex-wrap gap-2">
             {isSaving && (
               <div className="flex items-center text-gray-400 text-sm">
                 <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin mr-2"></div>
-                Saving...
+                <span className="hidden sm:inline">Saving...</span>
               </div>
             )}
 
@@ -278,8 +278,8 @@ export default function Write() {
               className="glass-button text-white border-white/20 hover:bg-white/10"
               disabled={isSaving}
             >
-              <Save className="h-4 w-4 mr-2" />
-              Save Draft
+              <Save className="h-4 w-4 mr-1.5" />
+              <span className="hidden sm:inline">Save Draft</span>
             </Button>
 
             <Button
@@ -290,8 +290,8 @@ export default function Write() {
                 isPreview ? "text-brand-400 border-brand-400/30" : "text-white"
               }`}
             >
-              <Eye className="h-4 w-4 mr-2" />
-              Preview
+              <Eye className="h-4 w-4 mr-1.5" />
+              <span className="hidden sm:inline">Preview</span>
             </Button>
 
             <Button
@@ -305,12 +305,12 @@ export default function Write() {
               {isSubmitting ? (
                 <div className="flex items-center">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                  Submitting...
+                  <span className="hidden sm:inline">Submitting...</span>
                 </div>
               ) : (
                 <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Submit for Review
+                  <Send className="h-4 w-4 mr-1.5" />
+                  <span className="hidden sm:inline">Submit for Review</span>
                 </>
               )}
             </Button>
