@@ -847,6 +847,37 @@ export default function Admin() {
             </div>
           </div>
         )}
+      {/* Preview Modal */}
+      {previewPost && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setPreviewPost(null)} />
+          <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto glass-card">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-white">{previewPost.title}</h2>
+                <p className="text-gray-400 text-sm">Category: {previewPost.category} • Status: {previewPost.status}</p>
+              </div>
+              <button onClick={() => setPreviewPost(null)} className="text-gray-400 hover:text-white">✕</button>
+            </div>
+            {previewPost.coverImage && (
+              <img src={previewPost.coverImage} alt="cover" className="w-full h-56 object-cover rounded-xl mb-4" />
+            )}
+            {previewPost.excerpt && (
+              <p className="text-gray-300 mb-4">{previewPost.excerpt}</p>
+            )}
+            <div
+              className="prose prose-invert max-w-none text-gray-300"
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(previewPost.content) }}
+            />
+            {previewPost.status === "pending" && (
+              <div className="mt-6 flex items-center justify-end space-x-2">
+                <Button onClick={() => { handleBlogAction(previewPost.id, "reject"); setPreviewPost(null); }} className="bg-red-600 hover:bg-red-700 text-white">Reject</Button>
+                <Button onClick={() => { handleBlogAction(previewPost.id, "approve"); setPreviewPost(null); }} className="bg-green-600 hover:bg-green-700 text-white">Approve</Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       </main>
     </div>
   );
