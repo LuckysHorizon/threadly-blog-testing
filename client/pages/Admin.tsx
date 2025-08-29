@@ -605,7 +605,7 @@ export default function Admin() {
                           <p className="text-gray-400 text-xs">
                             On:{" "}
                             <span className="text-brand-400">
-                              {comment.blogTitle}
+                              {blogs.find((b) => b.id === comment.blogId)?.title ?? "Unknown"}
                             </span>
                           </p>
                         </div>
