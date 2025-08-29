@@ -25,12 +25,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  mockBlogPosts,
   mockAuthors,
   getAuthorById,
   Author,
   BlogPost,
 } from "@/lib/mockData";
+import { usePosts } from "@/contexts/PostsContext";
+import { useComments } from "@/contexts/CommentsContext";
 
 type Tab = "overview" | "blogs" | "comments" | "users" | "analytics";
 
