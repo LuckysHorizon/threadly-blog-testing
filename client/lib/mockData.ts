@@ -354,7 +354,7 @@ export const mockCategories = [
   },
 ];
 
-export const mockAuthors = [
+export const mockAuthorHighlights = [
   {
     name: "Dr. Sarah Chen",
     avatar:
