@@ -57,7 +57,7 @@ interface AuthProviderProps {
 }
 
 // Mock user database
-const mockUsers = [
+const mockUsers: User[] = [
   {
     id: "admin-1",
     name: "Sarah Chen",
