@@ -6,7 +6,6 @@ import {
   X,
   User,
   LogIn,
-  Brain,
   Sparkles,
   LogOut,
   Settings,
