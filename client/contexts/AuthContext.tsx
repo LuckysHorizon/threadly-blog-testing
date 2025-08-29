@@ -95,25 +95,47 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Find user in mock database
+      const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || "admin@threadly.com";
+      const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "Lucky@123";
+      const ADMIN_NAME = import.meta.env.VITE_ADMIN_NAME || "Manikanta Boda";
+      const ADMIN_AVATAR =
+        import.meta.env.VITE_ADMIN_AVATAR ||
+        "https://cdn.builder.io/api/v1/image/assets%2F945110ca98a745c1b72f359aa559f018%2F0cb2dab15ff946b9ac7237fb5eb05818?format=webp&width=128";
+
+      // Admin path
+      if (email === ADMIN_EMAIL) {
+        if (password !== ADMIN_PASSWORD) {
+          throw new Error("Invalid password");
+        }
+        const adminUser: User = {
+          id: "admin-threadly",
+          name: ADMIN_NAME,
+          username: "manikantaboda",
+          email: ADMIN_EMAIL,
+          avatar: ADMIN_AVATAR,
+          role: "admin",
+          bio: "Administrator of Threadly",
+          socialLinks: {},
+          joinedAt: new Date().toISOString().split("T")[0],
+          articlesCount: 0,
+          followersCount: 0,
+        };
+        setUser(adminUser);
+        localStorage.setItem("aiblog_user", JSON.stringify(adminUser));
+        return;
+      }
+
+      // Regular demo users path
       const foundUser = mockUsers.find((u) => u.email === email);
-
-      if (!foundUser) {
-        throw new Error("User not found");
-      }
-
-      // In a real app, password would be verified here
-      if (password !== "password123") {
-        throw new Error("Invalid password");
-      }
+      if (!foundUser) throw new Error("User not found");
+      if (password !== "password123") throw new Error("Invalid password");
 
       setUser(foundUser);
       localStorage.setItem("aiblog_user", JSON.stringify(foundUser));
     } catch (error) {
-      throw error;
+      throw error as Error;
     } finally {
       setIsLoading(false);
     }
