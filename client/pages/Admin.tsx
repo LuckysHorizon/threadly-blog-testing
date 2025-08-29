@@ -807,7 +807,7 @@ export default function Admin() {
                   Top Performing Articles
                 </h3>
                 <div className="space-y-3">
-                  {mockBlogPosts
+                  {blogs
                     .filter((p) => p.status === "published")
                     .sort((a, b) => b.stats.views - a.stats.views)
                     .slice(0, 5)
