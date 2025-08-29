@@ -116,8 +116,6 @@ export default function Admin() {
     },
   ];
 
-  const [comments, setComments] = useState<Comment[]>(mockComments);
-
   // Handle blog actions
   const handleBlogAction = async (
     blogId: string,
