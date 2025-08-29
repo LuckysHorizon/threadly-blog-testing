@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BlogCard from "@/components/BlogCard";
-import { mockBlogPosts, mockCategories } from "@/lib/mockData";
+import { mockBlogPosts, mockCategories, getAuthorById } from "@/lib/mockData";
 
 type SortOption = "latest" | "popular" | "trending" | "oldest";
 type ViewMode = "grid" | "list";
@@ -29,15 +29,19 @@ export default function Blogs() {
 
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter(
-        (post) =>
-          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          post.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          post.tags.some((tag) =>
-            tag.toLowerCase().includes(searchQuery.toLowerCase()),
-          ),
-      );
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter((post) => {
+        const author = getAuthorById(post.authorId);
+        const authorName = author?.name?.toLowerCase() ?? "";
+        const authorUsername = author?.username?.toLowerCase() ?? "";
+        return (
+          post.title.toLowerCase().includes(q) ||
+          post.excerpt.toLowerCase().includes(q) ||
+          authorName.includes(q) ||
+          authorUsername.includes(q) ||
+          post.tags.some((tag) => tag.toLowerCase().includes(q))
+        );
+      });
     }
 
     // Filter by category
