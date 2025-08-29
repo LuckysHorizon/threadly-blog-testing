@@ -80,7 +80,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
         }
 
         await signUp({ email, password, name, username });
-        setSuccess("Account created successfully! Welcome to AI Blog!");
+        setSuccess("Account created successfully! Welcome to Threadly!");
         setTimeout(() => {
           onClose();
           resetForm();
@@ -128,7 +128,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-white">
               {mode === "signin" && "Welcome Back"}
-              {mode === "signup" && "Join AI Blog"}
+              {mode === "signup" && "Join Threadly"}
               {mode === "forgot" && "Reset Password"}
             </h2>
             <button
@@ -142,18 +142,10 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
           {/* Demo Credentials - Only show in signin mode */}
           {mode === "signin" && (
             <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-brand-500/10 to-purple-500/10 border border-brand-400/20">
-              <p className="text-sm text-brand-300 font-medium mb-2">
-                Demo Credentials:
-              </p>
+              <p className="text-sm text-brand-300 font-medium mb-2">Demo Credentials:</p>
               <div className="text-xs text-gray-300 space-y-1">
                 <p>
-                  User: <span className="text-brand-400">user@aiblog.com</span>{" "}
-                  / password123
-                </p>
-                <p>
-                  Admin:{" "}
-                  <span className="text-brand-400">admin@aiblog.com</span> /
-                  password123
+                  User: <span className="text-brand-400">user@aiblog.com</span> / password123
                 </p>
               </div>
             </div>
