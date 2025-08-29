@@ -345,6 +345,13 @@ export default function Admin() {
                           <div className="flex space-x-2">
                             <Button
                               size="sm"
+                              onClick={() => setPreviewPost(post)}
+                              className="glass-button text-white px-3 py-1 text-xs"
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
                               onClick={() =>
                                 handleBlogAction(post.id, "approve")
                               }
