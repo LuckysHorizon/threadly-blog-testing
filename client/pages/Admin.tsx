@@ -163,11 +163,11 @@ export default function Admin() {
   });
 
   const filteredComments = comments.filter((comment) => {
-    const matchesSearch =
-      comment.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      comment.blogTitle.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      filterStatus === "all" || comment.status === filterStatus;
+    const q = searchQuery.toLowerCase();
+    const post = blogs.find((b) => b.id === comment.blogId);
+    const blogTitle = post?.title?.toLowerCase() ?? "";
+    const matchesSearch = comment.content.toLowerCase().includes(q) || blogTitle.includes(q);
+    const matchesStatus = filterStatus === "all" || comment.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
