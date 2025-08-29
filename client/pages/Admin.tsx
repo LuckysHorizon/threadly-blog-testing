@@ -64,6 +64,17 @@ export default function Admin() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const { posts: blogs, updatePost, deletePost } = usePosts();
   const { comments, moderateComment, deleteComment } = useComments();
+  const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
+
+  const renderMarkdown = (text: string) =>
+    text
+      .replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold text-white mt-4 mb-2">$1<\/h3>')
+      .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold text-white mt-5 mb-3">$1<\/h2>')
+      .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-white mt-6 mb-4">$1<\/h1>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1<\/strong>')
+      .replace(/\*(.*?)\*/g, '<em class="italic">$1<\/em>')
+      .replace(/`(.*?)`/g, '<code class="bg-gray-800 px-1 py-0.5 rounded text-brand-400">$1<\/code>')
+      .replace(/\n/g, "<br>");
 
   // Redirect if not admin
   useEffect(() => {
