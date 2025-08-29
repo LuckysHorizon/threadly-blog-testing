@@ -224,7 +224,7 @@ export default function Navigation() {
                         className="flex items-center px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 transition-colors duration-200"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        <Brain className="h-4 w-4 mr-3" />
+                        <Sparkles className="h-4 w-4 mr-3" />
                         Admin Panel
                       </Link>
                     )}
