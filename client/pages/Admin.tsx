@@ -195,7 +195,7 @@ export default function Admin() {
                   Admin Dashboard
                 </h1>
                 <p className="text-gray-400 text-sm">
-                  Manage your AI Blog platform
+                  Manage your Threadly platform
                 </p>
               </div>
             </div>
