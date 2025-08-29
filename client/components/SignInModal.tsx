@@ -276,7 +276,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-10 pr-12 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 backdrop-blur-xl"
                     placeholder="Enter your password"
-                    required={mode !== "forgot"}
+                    required={true}
                     minLength={mode === "signup" ? 6 : undefined}
                   />
                   <button
