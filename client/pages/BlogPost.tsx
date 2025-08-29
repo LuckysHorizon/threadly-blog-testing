@@ -17,7 +17,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BlogCard from "@/components/BlogCard";
-import { mockBlogPosts, getAuthorById } from "@/lib/mockData";
+import { getAuthorById } from "@/lib/mockData";
+import { usePosts } from "@/contexts/PostsContext";
+import { useComments } from "@/contexts/CommentsContext";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function BlogPost() {
@@ -27,8 +29,8 @@ export default function BlogPost() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [comment, setComment] = useState("");
 
-  // Find the blog post
-  const post = mockBlogPosts.find((p) => p.id === id) || mockBlogPosts[0];
+  const { posts } = usePosts();
+  const post = posts.find((p) => p.id === id) || posts[0];
   const author = getAuthorById(post.authorId);
   const relatedPosts = mockBlogPosts
     .filter((p) => p.id !== post.id && p.category === post.category)
@@ -55,7 +57,10 @@ export default function BlogPost() {
     );
   }
 
-  // Mock comments data
+  const { comments, getByBlogId, addComment } = useComments();
+  const blogComments = useMemo(() => getByBlogId(post.id), [comments, post.id, getByBlogId]);
+
+  // Mock comments data (removed)
   const mockComments = [
     {
       id: "1",
