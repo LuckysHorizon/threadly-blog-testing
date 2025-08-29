@@ -97,8 +97,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || "admin@threadly.com";
-      const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "Lucky@123";
+      const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || "";
+      const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "";
       const ADMIN_NAME = import.meta.env.VITE_ADMIN_NAME || "Manikanta Boda";
       const ADMIN_AVATAR =
         import.meta.env.VITE_ADMIN_AVATAR ||
