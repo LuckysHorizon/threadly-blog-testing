@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BlogCard from "@/components/BlogCard";
-import { mockBlogPosts, mockCategories } from "@/lib/mockData";
+import { mockCategories } from "@/lib/mockData";
+import { usePosts } from "@/contexts/PostsContext";
 
 export default function Index() {
   const [typedText, setTypedText] = useState("");
@@ -33,10 +34,9 @@ export default function Index() {
     return () => clearInterval(timer);
   }, []);
 
-  const featuredPosts = mockBlogPosts.filter((post) => post.featured);
-  const latestPosts = mockBlogPosts
-    .filter((post) => !post.featured)
-    .slice(0, 6);
+  const { posts } = usePosts();
+  const featuredPosts = posts.filter((post) => post.featured);
+  const latestPosts = posts.filter((post) => !post.featured).slice(0, 6);
 
   return (
     <div className="min-h-screen">

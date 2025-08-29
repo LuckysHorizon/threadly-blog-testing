@@ -11,7 +11,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BlogCard from "@/components/BlogCard";
-import { mockBlogPosts, mockCategories, getAuthorById } from "@/lib/mockData";
+import { mockCategories, getAuthorById } from "@/lib/mockData";
+import { usePosts } from "@/contexts/PostsContext";
 
 type SortOption = "latest" | "popular" | "trending" | "oldest";
 type ViewMode = "grid" | "list";
@@ -25,7 +26,8 @@ export default function Blogs() {
 
   // Filter and sort posts
   const filteredAndSortedPosts = useMemo(() => {
-    let filtered = mockBlogPosts;
+    const { posts } = usePosts();
+    let filtered = posts;
 
     // Filter by search query
     if (searchQuery) {
