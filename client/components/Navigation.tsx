@@ -88,12 +88,16 @@ export default function Navigation() {
           >
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-brand-400 to-purple-400 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
-              <div className="relative bg-gradient-to-r from-brand-500 to-purple-500 p-1.5 sm:p-2 rounded-xl">
-                <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+              <div className="relative p-0.5 sm:p-1 rounded-xl bg-white/5 border border-white/10">
+                <img
+                  src={"https://cdn.builder.io/api/v1/image/assets%2F945110ca98a745c1b72f359aa559f018%2F0cb2dab15ff946b9ac7237fb5eb05818?format=webp&width=128"}
+                  alt="Threadly logo"
+                  className="h-6 w-6 sm:h-8 sm:w-8 rounded-lg object-contain"
+                />
               </div>
             </div>
             <span className="text-lg sm:text-xl font-bold text-gradient">
-              AI Blog
+              Threadly
             </span>
           </Link>
 
