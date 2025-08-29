@@ -32,7 +32,7 @@ export default function BlogPost() {
   const { posts } = usePosts();
   const post = posts.find((p) => p.id === id) || posts[0];
   const author = getAuthorById(post.authorId);
-  const relatedPosts = mockBlogPosts
+  const relatedPosts = posts
     .filter((p) => p.id !== post.id && p.category === post.category)
     .slice(0, 3);
 
