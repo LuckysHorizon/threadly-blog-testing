@@ -136,16 +136,10 @@ export default function Admin() {
     action: "approve" | "reject" | "delete",
   ) => {
     if (action === "delete") {
-      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      deleteComment(commentId);
       return;
     }
-    setComments((prev) =>
-      prev.map((c) =>
-        c.id === commentId
-          ? { ...c, status: action === "approve" ? "approved" : "rejected" }
-          : c,
-      ),
-    );
+    moderateComment(commentId, action === "approve" ? "approved" : "rejected");
   };
 
   // Handle user actions
