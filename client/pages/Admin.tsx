@@ -124,16 +124,10 @@ export default function Admin() {
     action: "approve" | "reject" | "delete",
   ) => {
     if (action === "delete") {
-      setBlogs((prev) => prev.filter((b) => b.id !== blogId));
+      deletePost(blogId);
       return;
     }
-    setBlogs((prev) =>
-      prev.map((b) =>
-        b.id === blogId
-          ? { ...b, status: action === "approve" ? "published" : "draft" }
-          : b,
-      ),
-    );
+    updatePost(blogId, { status: action === "approve" ? "published" : "draft" });
   };
 
   // Handle comment actions
