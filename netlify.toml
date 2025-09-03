@@ -1,15 +1,35 @@
 [build]
-  command = "npm run build:client"
+  command = "npm run build"
   functions = "netlify/functions"
   publish = "dist/spa"
 
+[dev]
+  command = "npm run dev"
+  port = 8080
+  publish = "dist/spa"
+  functions = "netlify/functions"
 
 [functions]
-  external_node_modules = ["express"]
+  external_node_modules = ["express", "@prisma/client", "bcryptjs", "jsonwebtoken", "multer", "cors", "helmet", "express-rate-limit", "express-validator"]
   node_bundler = "esbuild"
-  
+  included_files = ["prisma/**/*", "shared/**/*"]
+
 [[redirects]]
   force = true
   from = "/api/*"
   status = 200
   to = "/.netlify/functions/api/:splat"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+[functions."api"]
+  node_bundler = "esbuild"
+  external_node_modules = ["express", "@prisma/client", "bcryptjs", "jsonwebtoken", "multer", "cors", "helmet", "express-rate-limit", "express-validator"]
+  included_files = ["prisma/**/*", "shared/**/*"]

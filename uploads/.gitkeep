@@ -1,0 +1,2 @@
+# This file ensures the uploads directory is tracked in git
+# In production, this directory should be excluded from git and use cloud storage instead

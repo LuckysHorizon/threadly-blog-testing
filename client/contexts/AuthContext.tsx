@@ -5,6 +5,8 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { supabase, signUpWithEmail, signInWithEmail, signInWithProvider as supabaseSignInWithProvider, signOut as supabaseSignOut } from "../lib/supabase";
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface User {
   id: string;
@@ -22,6 +24,7 @@ interface User {
   joinedAt: string;
   articlesCount: number;
   followersCount: number;
+  provider?: string;
 }
 
 interface SignUpData {
@@ -56,84 +59,82 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Mock user database (demo user only; admin is handled via secure env credentials)
-const mockUsers: User[] = [
-  {
-    id: "user-1",
-    name: "Alex Rodriguez",
-    username: "alexrod",
-    email: "user@aiblog.com",
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-    role: "user" as const,
-    bio: "Senior Data Scientist passionate about AI and machine learning.",
+// Helper function to convert Supabase user to our User interface
+const convertSupabaseUser = (supabaseUser: SupabaseUser): User => {
+  const userMetadata = supabaseUser.user_metadata || {};
+  const appMetadata = supabaseUser.app_metadata || {};
+  
+  return {
+    id: supabaseUser.id,
+    name: userMetadata.name || userMetadata.full_name || 'User',
+    username: userMetadata.username || userMetadata.preferred_username || supabaseUser.email?.split('@')[0] || 'user',
+    email: supabaseUser.email || '',
+    avatar: userMetadata.avatar_url || userMetadata.picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${supabaseUser.id}`,
+    role: appMetadata.role === 'admin' ? 'admin' : 'user',
+    bio: userMetadata.bio || '',
     socialLinks: {
-      linkedin: "https://linkedin.com/in/alexrodriguez",
+      twitter: userMetadata.twitter,
+      github: userMetadata.github,
+      linkedin: userMetadata.linkedin,
     },
-    joinedAt: "2023-03-20",
-    articlesCount: 5,
-    followersCount: 890,
-  },
-];
+    joinedAt: supabaseUser.created_at ? new Date(supabaseUser.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+    articlesCount: 0,
+    followersCount: 0,
+    provider: supabaseUser.app_metadata?.provider || 'email',
+  };
+};
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load user from localStorage on mount
+  // Initialize auth state and listen for changes
   useEffect(() => {
-    const savedUser = localStorage.getItem("aiblog_user");
-    if (savedUser) {
+    // Get initial session
+    const getInitialSession = async () => {
       try {
-        setUser(JSON.parse(savedUser));
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error getting session:', error);
+          return;
+        }
+        
+        if (session?.user) {
+          setUser(convertSupabaseUser(session.user));
+        }
       } catch (error) {
-        localStorage.removeItem("aiblog_user");
+        console.error('Error in getInitialSession:', error);
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    getInitialSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
+        
+        if (session?.user) {
+          setUser(convertSupabaseUser(session.user));
+        } else {
+          setUser(null);
+        }
+        setIsLoading(false);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || "";
-      const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "";
-      const ADMIN_NAME = import.meta.env.VITE_ADMIN_NAME || "Manikanta Boda";
-      const ADMIN_AVATAR =
-        import.meta.env.VITE_ADMIN_AVATAR ||
-        "https://cdn.builder.io/api/v1/image/assets%2F945110ca98a745c1b72f359aa559f018%2F0cb2dab15ff946b9ac7237fb5eb05818?format=webp&width=128";
-
-      // Admin path
-      if (email === ADMIN_EMAIL) {
-        if (password !== ADMIN_PASSWORD) {
-          throw new Error("Invalid password");
-        }
-        const adminUser: User = {
-          id: "admin-threadly",
-          name: ADMIN_NAME,
-          username: "manikantaboda",
-          email: ADMIN_EMAIL,
-          avatar: ADMIN_AVATAR,
-          role: "admin",
-          bio: "Administrator of Threadly",
-          socialLinks: {},
-          joinedAt: new Date().toISOString().split("T")[0],
-          articlesCount: 0,
-          followersCount: 0,
-        };
-        setUser(adminUser);
-        localStorage.setItem("aiblog_user", JSON.stringify(adminUser));
-        return;
-      }
-
-      // Regular demo users path
-      const foundUser = mockUsers.find((u) => u.email === email);
-      if (!foundUser) throw new Error("User not found");
-      if (password !== "password123") throw new Error("Invalid password");
-
-      setUser(foundUser);
-      localStorage.setItem("aiblog_user", JSON.stringify(foundUser));
+      await signInWithEmail(email, password);
+      // User state will be updated by the auth state change listener
     } catch (error) {
       throw error as Error;
     } finally {
@@ -144,51 +145,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signUp = async (data: SignUpData) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || "";
-
-      // Prevent registering with admin email
-      if (ADMIN_EMAIL && data.email === ADMIN_EMAIL) {
-        throw new Error("Registration with reserved email is not allowed");
+      if (!data.name || !data.username) {
+        throw new Error("Name and username are required");
       }
 
-      // Check if user already exists
-      const existingUser = mockUsers.find((u) => u.email === data.email);
-      if (existingUser) {
-        throw new Error("User with this email already exists");
-      }
-
-      // Generate username if not provided
-      const username = data.username || data.email.split("@")[0];
-
-      // Check if username is taken
-      const usernameExists = mockUsers.find((u) => u.username === username);
-      if (usernameExists) {
-        throw new Error("Username is already taken");
-      }
-
-      // Create new user
-      const newUser: User = {
-        id: `user-${Date.now()}`,
-        name: data.name || data.email.split("@")[0],
-        username: username,
-        email: data.email,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
-        role: "user",
-        bio: "",
-        socialLinks: {},
-        joinedAt: new Date().toISOString().split("T")[0],
-        articlesCount: 0,
-        followersCount: 0,
-      };
-
-      // Add to mock database (in real app, this would be saved to backend)
-      mockUsers.push(newUser);
-
-      setUser(newUser);
-      localStorage.setItem("aiblog_user", JSON.stringify(newUser));
+      await signUpWithEmail(data.email, data.password, {
+        name: data.name,
+        username: data.username,
+      });
+      // User state will be updated by the auth state change listener
     } catch (error) {
       throw error;
     } finally {
@@ -199,41 +164,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signInWithProvider = async (provider: "google" | "github") => {
     setIsLoading(true);
     try {
-      // Simulate OAuth flow
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-
-      // Mock OAuth response
-      const mockOAuthUser = {
-        google: {
-          id: `google-${Date.now()}`,
-          name: "Google User",
-          username: "googleuser",
-          email: "user@gmail.com",
-          avatar: "https://lh3.googleusercontent.com/a/default-user",
-          provider: "google",
-        },
-        github: {
-          id: `github-${Date.now()}`,
-          name: "GitHub User",
-          username: "githubuser",
-          email: "user@github.com",
-          avatar: "https://avatars.githubusercontent.com/u/1?v=4",
-          provider: "github",
-        },
-      }[provider];
-
-      const newUser: User = {
-        ...mockOAuthUser,
-        role: "user",
-        bio: "",
-        socialLinks: {},
-        joinedAt: new Date().toISOString().split("T")[0],
-        articlesCount: 0,
-        followersCount: 0,
-      };
-
-      setUser(newUser);
-      localStorage.setItem("aiblog_user", JSON.stringify(newUser));
+      await supabaseSignInWithProvider(provider);
+      // User will be redirected to OAuth provider, then to callback page
     } catch (error) {
       throw new Error(`Failed to sign in with ${provider}`);
     } finally {
@@ -246,12 +178,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Update user metadata in Supabase
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          name: updates.name,
+          username: updates.username,
+          bio: updates.bio,
+          twitter: updates.socialLinks?.twitter,
+          github: updates.socialLinks?.github,
+          linkedin: updates.socialLinks?.linkedin,
+        }
+      });
 
-      const updatedUser = { ...user, ...updates };
-      setUser(updatedUser);
-      localStorage.setItem("aiblog_user", JSON.stringify(updatedUser));
+      if (error) throw error;
+      
+      // User state will be updated by the auth state change listener
     } catch (error) {
       throw new Error("Failed to update user");
     } finally {
@@ -259,9 +200,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const signOut = () => {
-    setUser(null);
-    localStorage.removeItem("aiblog_user");
+  const signOut = async () => {
+    try {
+      await supabaseSignOut();
+      // User state will be updated by the auth state change listener
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
   };
 
   const value: AuthContextType = {

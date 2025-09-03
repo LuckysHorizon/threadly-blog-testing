@@ -15,6 +15,7 @@ import Blogs from "./pages/Blogs";
 import BlogPost from "./pages/BlogPost";
 import Write from "./pages/Write";
 import Admin from "./pages/Admin";
+import AuthCallback from "./pages/AuthCallback";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
 import { BookOpen, Users, FolderOpen, Info } from "lucide-react";
@@ -37,6 +38,7 @@ const App = () => (
                   <Route path="/blog/:id" element={<BlogPost />} />
                   <Route path="/write" element={<Write />} />
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route
                     path="/categories"
                     element={

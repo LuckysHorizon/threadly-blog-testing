@@ -1,0 +1,157 @@
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { Request, Response, NextFunction } from 'express';
+import { User } from '@prisma/client';
+import { ApiResponse } from '@shared/api';
+import { verifySupabaseToken } from './supabase';
+
+// JWT Configuration
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret';
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
+
+// Password utilities
+export const hashPassword = async (password: string): Promise<string> => {
+  const saltRounds = 12;
+  return bcrypt.hash(password, saltRounds);
+};
+
+export const comparePassword = async (password: string, hashedPassword: string): Promise<boolean> => {
+  return bcrypt.compare(password, hashedPassword);
+};
+
+// JWT utilities
+export const generateAccessToken = (user: User): string => {
+  return jwt.sign(
+    {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
+  );
+};
+
+export const generateRefreshToken = (user: User): string => {
+  return jwt.sign(
+    {
+      userId: user.id,
+      email: user.email,
+    },
+    JWT_REFRESH_SECRET,
+    { expiresIn: JWT_REFRESH_EXPIRES_IN }
+  );
+};
+
+export const verifyAccessToken = (token: string): any => {
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    return null;
+  }
+};
+
+export const verifyRefreshToken = (token: string): any => {
+  try {
+    return jwt.verify(token, JWT_REFRESH_SECRET);
+  } catch (error) {
+    return null;
+  }
+};
+
+// Middleware types
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    userId: string;
+    email: string;
+    role: string;
+  };
+}
+
+// Authentication middleware - supports both JWT and Supabase tokens
+export const authenticateToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      error: 'Access token required',
+    } as ApiResponse<null>);
+  }
+
+  try {
+    // First try Supabase token verification
+    const supabaseUser = await verifySupabaseToken(token);
+    if (supabaseUser) {
+      req.user = {
+        userId: supabaseUser.id,
+        email: supabaseUser.email || '',
+        role: supabaseUser.app_metadata?.role || 'USER'
+      };
+      return next();
+    }
+
+    // Fallback to JWT verification for backward compatibility
+    const decoded = verifyAccessToken(token);
+    if (decoded) {
+      req.user = decoded;
+      return next();
+    }
+
+    return res.status(403).json({
+      success: false,
+      error: 'Invalid or expired token',
+    } as ApiResponse<null>);
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return res.status(403).json({
+      success: false,
+      error: 'Invalid or expired token',
+    } as ApiResponse<null>);
+  }
+};
+
+// Role-based access control middleware
+export const requireRole = (roles: string[]) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Authentication required',
+      } as ApiResponse<null>);
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Insufficient permissions',
+      } as ApiResponse<null>);
+    }
+
+    next();
+  };
+};
+
+// Admin-only middleware
+export const requireAdmin = requireRole(['ADMIN']);
+
+// User or Admin middleware
+export const requireUser = requireRole(['USER', 'ADMIN']);
+
+// Extract user from token (for optional authentication)
+export const optionalAuth = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (token) {
+    const decoded = verifyAccessToken(token);
+    if (decoded) {
+      req.user = decoded;
+    }
+  }
+
+  next();
+};

@@ -1,0 +1,243 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")   
+  directUrl = env("DIRECT_URL") 
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  username    String   @unique
+  password    String?  // Null for OAuth users
+  avatar      String?
+  bio         String?
+  role        UserRole @default(USER)
+  provider    AuthProvider @default(EMAIL)
+  providerId  String?  // OAuth provider ID (Google, GitHub)
+  
+  // Social links
+  twitter     String?
+  github      String?
+  linkedin    String?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastLoginAt DateTime?
+  
+  // Relations
+  blogs       Blog[]
+  comments    Comment[]
+  notifications Notification[]
+  likes       BlogLike[]
+  followers   Follows[] @relation("following")
+  following   Follows[] @relation("follower")
+  
+  // Analytics
+  articlesCount   Int @default(0)
+  followersCount  Int @default(0)
+  totalViews      Int @default(0)
+  totalLikes     Int @default(0)
+  
+  @@map("users")
+}
+
+model Blog {
+  id          String      @id @default(cuid())
+  title       String
+  excerpt     String
+  content     String      // Markdown content
+  richContent Json?       // Rich text JSON for TipTap/Editor.js
+  
+  // Metadata
+  slug        String      @unique
+  readTime    String
+  category    String
+  tags        String[]
+  coverImage  String?
+  
+  // Status and workflow
+  status      BlogStatus  @default(DRAFT)
+  featured    Boolean     @default(false)
+  publishedAt DateTime?
+  
+  // Relations
+  authorId    String
+  author      User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+  likes       BlogLike[]
+  analytics   BlogAnalytics[]
+  
+  // Analytics
+  views       Int         @default(0)
+  likesCount  Int         @default(0)
+  commentsCount Int       @default(0)
+  trendingScore Float     @default(0)
+  
+  // Timestamps
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  @@map("blogs")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  
+  // Threading support
+  parentId  String?  // For replies
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+  
+  // Relations
+  blogId    String
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("comments")
+}
+
+model BlogLike {
+  id      String   @id @default(cuid())
+  blogId  String
+  userId  String
+  blog    Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  
+  @@unique([blogId, userId])
+  @@map("blog_likes")
+}
+
+model Follows {
+  followerId  String
+  followingId String
+  follower    User   @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User   @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  
+  @@id([followerId, followingId])
+  @@map("follows")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  
+  // Relations
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Optional relations for specific notification types
+  blogId    String?
+  commentId String?
+  
+  // Timestamps
+  createdAt DateTime         @default(now())
+  
+  @@map("notifications")
+}
+
+model BlogAnalytics {
+  id            String   @id @default(cuid())
+  blogId        String   @unique
+  blog          Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  
+  // View tracking
+  totalViews    Int      @default(0)
+  uniqueViews  Int      @default(0)
+  viewsByDate  Json     // Store daily view counts
+  
+  // Engagement metrics
+  avgTimeOnPage Float    @default(0)
+  bounceRate   Float    @default(0)
+  
+  // Social metrics
+  shares       Int      @default(0)
+  bookmarks   Int      @default(0)
+  
+  // SEO metrics
+  searchRank   Int?
+  keywords     String[]
+  
+  updatedAt    DateTime @updatedAt
+  
+  @@map("blog_analytics")
+}
+
+model NewsletterSubscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  preferences Json?  // Store user preferences
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("newsletter_subscriptions")
+}
+
+model AISuggestion {
+  id        String   @id @default(cuid())
+  blogId    String?
+  type      AISuggestionType
+  content   Json     // Store AI-generated suggestions
+  metadata  Json?    // Additional AI metadata
+  createdAt DateTime @default(now())
+  
+  @@map("ai_suggestions")
+}
+
+// Enums
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  GITHUB
+}
+
+enum BlogStatus {
+  DRAFT
+  PENDING
+  PUBLISHED
+  REJECTED
+  SCHEDULED
+}
+
+enum NotificationType {
+  BLOG_APPROVED
+  BLOG_REJECTED
+  BLOG_PUBLISHED
+  NEW_COMMENT
+  NEW_FOLLOWER
+  MENTION
+  SYSTEM
+}
+
+enum AISuggestionType {
+  TITLE_SUGGESTION
+  TAG_SUGGESTION
+  SEO_METADATA
+  CONTENT_SUMMARY
+  READABILITY_IMPROVEMENT
+}
