@@ -59,11 +59,9 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Helper function to convert Supabase user to our User interface
+// Helper: convert Supabase user; role will be overridden from server
 const convertSupabaseUser = (supabaseUser: SupabaseUser): User => {
   const userMetadata = supabaseUser.user_metadata || {};
-  const appMetadata = supabaseUser.app_metadata || {};
-  const roleMeta = (appMetadata.role || '').toString().toUpperCase();
 
   return {
     id: supabaseUser.id,
@@ -71,7 +69,7 @@ const convertSupabaseUser = (supabaseUser: SupabaseUser): User => {
     username: userMetadata.username || userMetadata.preferred_username || supabaseUser.email?.split('@')[0] || 'user',
     email: supabaseUser.email || '',
     avatar: userMetadata.avatar_url || userMetadata.picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${supabaseUser.id}`,
-    role: roleMeta === 'ADMIN' ? 'admin' : 'user',
+    role: 'user',
     bio: userMetadata.bio || '',
     socialLinks: {
       twitter: userMetadata.twitter,
@@ -84,6 +82,16 @@ const convertSupabaseUser = (supabaseUser: SupabaseUser): User => {
     provider: supabaseUser.app_metadata?.provider || 'email',
   };
 };
+
+async function fetchServerMe(accessToken: string): Promise<Partial<User> & { role?: string }> {
+  const resp = await fetch('/api/auth/me', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    credentials: 'include',
+  });
+  if (!resp.ok) throw new Error('Failed to fetch user from server');
+  const json = await resp.json();
+  return json?.data || {};
+}
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
@@ -101,7 +109,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
         
         if (session?.user) {
-          setUser(convertSupabaseUser(session.user));
+          let nextUser = convertSupabaseUser(session.user);
+          try {
+            if (session.access_token) {
+              const serverUser = await fetchServerMe(session.access_token);
+              if (serverUser.role) {
+                const roleNorm = serverUser.role.toString().toUpperCase() === 'ADMIN' ? 'admin' : 'user';
+                nextUser = { ...nextUser, role: roleNorm };
+              }
+              if (serverUser.name) nextUser.name = serverUser.name as string;
+              if (serverUser.avatar) nextUser.avatar = serverUser.avatar as string;
+              if (serverUser.username) nextUser.username = serverUser.username as string;
+            }
+          } catch (e) {
+            console.warn('Server role sync failed:', e);
+          }
+          setUser(nextUser);
         }
       } catch (error) {
         console.error('Error in getInitialSession:', error);
@@ -118,7 +141,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('Auth state changed:', event, session?.user?.email);
         
         if (session?.user) {
-          setUser(convertSupabaseUser(session.user));
+          let nextUser = convertSupabaseUser(session.user);
+          try {
+            if (session.access_token) {
+              const serverUser = await fetchServerMe(session.access_token);
+              if (serverUser.role) {
+                const roleNorm = serverUser.role.toString().toUpperCase() === 'ADMIN' ? 'admin' : 'user';
+                nextUser = { ...nextUser, role: roleNorm };
+              }
+              if (serverUser.name) nextUser.name = serverUser.name as string;
+              if (serverUser.avatar) nextUser.avatar = serverUser.avatar as string;
+              if (serverUser.username) nextUser.username = serverUser.username as string;
+            }
+          } catch (e) {
+            console.warn('Server role sync failed:', e);
+          }
+          setUser(nextUser);
+          if (nextUser.role === 'admin') {
+            try { window.location.replace('/admin'); } catch {}
+          }
         } else {
           setUser(null);
         }
