@@ -157,9 +157,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
             console.warn('Server role sync failed:', e);
           }
           setUser(nextUser);
-          if (nextUser.role === 'admin') {
-            try { window.location.replace('/admin'); } catch {}
-          }
+          // Redirect based on Supabase role OR configured admin email as fallback
+          try {
+            const roleMeta = (session.user.app_metadata?.role || '').toString().toUpperCase();
+            const email = session.user.email || '';
+            const envAdminEmail = import.meta.env.VITE_ADMIN_EMAIL || '';
+            const isAdmin = roleMeta === 'ADMIN' || (envAdminEmail && email === envAdminEmail) || nextUser.role === 'admin';
+            if (isAdmin) {
+              window.location.replace('/admin');
+            }
+          } catch {}
         } else {
           setUser(null);
         }
