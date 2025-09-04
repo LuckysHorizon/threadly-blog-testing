@@ -63,14 +63,15 @@ interface AuthProviderProps {
 const convertSupabaseUser = (supabaseUser: SupabaseUser): User => {
   const userMetadata = supabaseUser.user_metadata || {};
   const appMetadata = supabaseUser.app_metadata || {};
-  
+  const roleMeta = (appMetadata.role || '').toString().toUpperCase();
+
   return {
     id: supabaseUser.id,
     name: userMetadata.name || userMetadata.full_name || 'User',
     username: userMetadata.username || userMetadata.preferred_username || supabaseUser.email?.split('@')[0] || 'user',
     email: supabaseUser.email || '',
     avatar: userMetadata.avatar_url || userMetadata.picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${supabaseUser.id}`,
-    role: appMetadata.role === 'admin' ? 'admin' : 'user',
+    role: roleMeta === 'ADMIN' ? 'admin' : 'user',
     bio: userMetadata.bio || '',
     socialLinks: {
       twitter: userMetadata.twitter,
