@@ -163,12 +163,12 @@ export default function Navigation() {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 >
                   <img
-                    src={user.avatar}
-                    alt={user.name}
+                    src={user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=user'}
+                    alt={user?.name || 'User'}
                     className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-white/20"
                   />
                   <span className="hidden sm:inline text-sm max-w-20 lg:max-w-none truncate">
-                    {user.name}
+                    {user?.name || 'User'}
                   </span>
                 </Button>
 
@@ -177,10 +177,10 @@ export default function Navigation() {
                   <div className="absolute right-0 mt-2 w-48 sm:w-52 glass-card py-2 z-50 shadow-glass-lg">
                     <div className="px-4 py-2 border-b border-white/10">
                       <p className="text-white text-sm font-medium truncate">
-                        {user.name}
+                        {user?.name || 'User'}
                       </p>
                       <p className="text-gray-400 text-xs truncate">
-                        {user.email}
+                        {user?.email || ''}
                       </p>
                       <span
                         className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs ${

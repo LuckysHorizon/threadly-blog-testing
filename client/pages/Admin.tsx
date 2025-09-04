@@ -252,7 +252,7 @@ export default function Admin() {
 
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-400">Welcome back,</span>
-              <span className="font-medium text-white">{user.name}</span>
+              <span className="font-medium text-white">{user?.name ?? 'Admin'}</span>
             </div>
           </div>
         </div>
