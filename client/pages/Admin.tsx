@@ -228,28 +228,7 @@ export default function Admin() {
     return matchesSearch;
   });
 
-  if (checkingAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <div className="text-center text-gray-400">Checking access…</div>
-      </div>
-    );
-  }
-
-  if (!isAdminAllowed) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <div className="glass-card max-w-md w-full p-8 text-center">
-          <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
-            <AlertTriangle className="w-6 h-6 text-red-400" />
-          </div>
-          <h1 className="text-xl font-semibold text-white mb-2">Access denied</h1>
-          <p className="text-gray-400 mb-6">You do not have permission to view the admin dashboard.</p>
-          <Button onClick={() => navigate("/")} className="bg-brand-600 hover:bg-brand-700 text-white">Go back home</Button>
-        </div>
-      </div>
-    );
-  }
+  // Access control screen removed per request
 
   return (
     <div className="min-h-screen bg-background">
