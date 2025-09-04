@@ -23,6 +23,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "../lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { mockAuthors, getAuthorById, Author, BlogPost } from "@/lib/mockData";
 import { usePosts } from "@/contexts/PostsContext";
@@ -54,6 +55,8 @@ interface Comment {
 export default function Admin() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [isAdminAllowed, setIsAdminAllowed] = useState<boolean>(false);
+  const [checkingAdmin, setCheckingAdmin] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -86,10 +89,36 @@ export default function Admin() {
       )
       .replace(/\n/g, "<br>");
 
-  // Access control: show Access Denied UI if not admin
+  // Access control: verify role with server (Prisma is source of truth)
   useEffect(() => {
-    if (!isAuthenticated || !user) return;
-  }, [isAuthenticated, user]);
+    const checkAdmin = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          setIsAdminAllowed(false);
+          setCheckingAdmin(false);
+          return;
+        }
+        const resp = await fetch('/api/auth/me', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          credentials: 'include',
+        });
+        if (!resp.ok) {
+          setIsAdminAllowed(false);
+          setCheckingAdmin(false);
+          return;
+        }
+        const json = await resp.json();
+        const role = (json?.data?.role || '').toString().toUpperCase();
+        setIsAdminAllowed(role === 'ADMIN');
+      } catch (e) {
+        setIsAdminAllowed(false);
+      } finally {
+        setCheckingAdmin(false);
+      }
+    };
+    checkAdmin();
+  }, []);
 
   // Mock admin stats
   const adminStats: AdminStats = {
@@ -199,7 +228,15 @@ export default function Admin() {
     return matchesSearch;
   });
 
-  if (!isAuthenticated || !user || user.role !== "admin") {
+  if (checkingAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="text-center text-gray-400">Checking access…</div>
+      </div>
+    );
+  }
+
+  if (!isAdminAllowed) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="glass-card max-w-md w-full p-8 text-center">
