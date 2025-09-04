@@ -18,8 +18,12 @@ export default function AuthCallback() {
         }
 
         if (data.session) {
-          // User is authenticated, redirect to home
-          navigate('/');
+          const role = data.session.user.app_metadata?.role;
+          if (role === 'ADMIN') {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
         } else {
           // No session, redirect to login
           navigate('/');
