@@ -112,12 +112,7 @@ export default function Admin() {
     checkAdmin();
   }, []);
 
-  // Redirect non-admins away silently once checked
-  useEffect(() => {
-    if (!checkingAdmin && !isAdminAllowed) {
-      navigate('/');
-    }
-  }, [checkingAdmin, isAdminAllowed, navigate]);
+  // Removed redirect; non-admins simply render nothing
 
   // Mock admin stats
   const adminStats: AdminStats = {
