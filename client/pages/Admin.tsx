@@ -120,6 +120,13 @@ export default function Admin() {
     checkAdmin();
   }, []);
 
+  // Redirect non-admins away silently once checked
+  useEffect(() => {
+    if (!checkingAdmin && !isAdminAllowed) {
+      navigate('/');
+    }
+  }, [checkingAdmin, isAdminAllowed, navigate]);
+
   // Mock admin stats
   const adminStats: AdminStats = {
     totalUsers: mockAuthors.length,
@@ -228,7 +235,10 @@ export default function Admin() {
     return matchesSearch;
   });
 
-  // Access control screen removed per request
+  // If still checking or not allowed, render nothing (prevents flash/overlay)
+  if (checkingAdmin || !isAdminAllowed) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
