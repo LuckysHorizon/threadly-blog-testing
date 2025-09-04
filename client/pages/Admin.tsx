@@ -99,8 +99,24 @@ export default function Admin() {
           setCheckingAdmin(false);
           return;
         }
-        const roleMeta = (session.user.app_metadata?.role || '').toString().toUpperCase();
-        const email = session.user.email || '';
+        // Prefer fresh user payload from Supabase (ensures latest app_metadata)
+        let roleMeta = (session.user.app_metadata?.role || '').toString().toUpperCase();
+        let email = session.user.email || '';
+
+        if (!roleMeta) {
+          const { data: userData } = await supabase.auth.getUser();
+          roleMeta = (userData?.user?.app_metadata?.role || '').toString().toUpperCase();
+          email = userData?.user?.email || email;
+        }
+
+        if (!roleMeta) {
+          // Force refresh then retry once
+          await supabase.auth.refreshSession();
+          const { data: userData } = await supabase.auth.getUser();
+          roleMeta = (userData?.user?.app_metadata?.role || '').toString().toUpperCase();
+          email = userData?.user?.email || email;
+        }
+
         const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || '';
         setIsAdminAllowed(roleMeta === 'ADMIN' || (adminEmail && email === adminEmail));
       } catch (e) {
