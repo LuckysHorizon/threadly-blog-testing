@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { hashPassword } from '../server/lib/auth';
 
+
 const prisma = new PrismaClient();
 
 async function main() {
@@ -500,3 +501,5 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+// Note: Admin promotion logic moved to prisma/promote-admin.ts

@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 import { User } from '@prisma/client';
 import { ApiResponse } from '@shared/api';
 import { verifySupabaseToken } from './supabase';
+import prisma from './database';
 
 // JWT Configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
@@ -86,10 +87,55 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
     // First try Supabase token verification
     const supabaseUser = await verifySupabaseToken(token);
     if (supabaseUser) {
+      // Ensure an application user exists and get role from our DB
+      const userEmail = supabaseUser.email || '';
+      if (!userEmail) {
+        return res.status(403).json({
+          success: false,
+          error: 'Email is required to authenticate user',
+        } as ApiResponse<null>);
+      }
+
+      let appUser = await prisma.user.findUnique({ where: { email: userEmail } });
+
+      if (!appUser) {
+        // Auto-provision minimal user record on first login
+        const preferredUsername = (supabaseUser.user_metadata?.username
+          || userEmail.split('@')[0]
+          || `user_${supabaseUser.id.substring(0, 8)}`)
+          .toString()
+          .toLowerCase()
+          .replace(/[^a-z0-9_\-]/g, '');
+
+        // Ensure username uniqueness
+        let uniqueUsername = preferredUsername;
+        let suffix = 1;
+        while (await prisma.user.findUnique({ where: { username: uniqueUsername } })) {
+          uniqueUsername = `${preferredUsername}${suffix++}`;
+        }
+
+        appUser = await prisma.user.create({
+          data: {
+            // Use Supabase UUID as primary id to link identities
+            id: supabaseUser.id,
+            email: userEmail,
+            name: supabaseUser.user_metadata?.name
+              || supabaseUser.user_metadata?.full_name
+              || userEmail.split('@')[0],
+            username: uniqueUsername,
+            provider: 'EMAIL',
+            providerId: supabaseUser.id,
+            avatar: supabaseUser.user_metadata?.avatar_url
+              || supabaseUser.user_metadata?.picture
+              || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uniqueUsername}`,
+          }
+        });
+      }
+
       req.user = {
-        userId: supabaseUser.id,
-        email: supabaseUser.email || '',
-        role: supabaseUser.app_metadata?.role || 'USER'
+        userId: appUser.id,
+        email: appUser.email,
+        role: appUser.role,
       };
       return next();
     }

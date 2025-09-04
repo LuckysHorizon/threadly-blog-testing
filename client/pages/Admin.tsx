@@ -86,12 +86,10 @@ export default function Admin() {
       )
       .replace(/\n/g, "<br>");
 
-  // Redirect if not admin
+  // Access control: show Access Denied UI if not admin
   useEffect(() => {
-    if (!isAuthenticated || !user || user.role !== "admin") {
-      navigate("/");
-    }
-  }, [isAuthenticated, user, navigate]);
+    if (!isAuthenticated || !user) return;
+  }, [isAuthenticated, user]);
 
   // Mock admin stats
   const adminStats: AdminStats = {
@@ -202,7 +200,18 @@ export default function Admin() {
   });
 
   if (!isAuthenticated || !user || user.role !== "admin") {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="glass-card max-w-md w-full p-8 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
+            <AlertTriangle className="w-6 h-6 text-red-400" />
+          </div>
+          <h1 className="text-xl font-semibold text-white mb-2">Access denied</h1>
+          <p className="text-gray-400 mb-6">You do not have permission to view the admin dashboard.</p>
+          <Button onClick={() => navigate("/")} className="bg-brand-600 hover:bg-brand-700 text-white">Go back home</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
