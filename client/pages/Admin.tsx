@@ -89,28 +89,20 @@ export default function Admin() {
       )
       .replace(/\n/g, "<br>");
 
-  // Access control: verify role with server (Prisma is source of truth)
+  // Access control: verify role with Supabase only
   useEffect(() => {
     const checkAdmin = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.access_token) {
+        if (!session?.user) {
           setIsAdminAllowed(false);
           setCheckingAdmin(false);
           return;
         }
-        const resp = await fetch('/api/auth/me', {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-          credentials: 'include',
-        });
-        if (!resp.ok) {
-          setIsAdminAllowed(false);
-          setCheckingAdmin(false);
-          return;
-        }
-        const json = await resp.json();
-        const role = (json?.data?.role || '').toString().toUpperCase();
-        setIsAdminAllowed(role === 'ADMIN');
+        const roleMeta = (session.user.app_metadata?.role || '').toString().toUpperCase();
+        const email = session.user.email || '';
+        const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || '';
+        setIsAdminAllowed(roleMeta === 'ADMIN' || (adminEmail && email === adminEmail));
       } catch (e) {
         setIsAdminAllowed(false);
       } finally {

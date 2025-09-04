@@ -4,6 +4,7 @@ import { validateRequest } from '../lib/validation';
 import { authenticateToken, requireUser } from '../lib/auth';
 import { hashPassword, comparePassword, generateAccessToken, generateRefreshToken } from '../lib/auth';
 import { successResponse, errorResponse } from '../lib/utils';
+import { supabase } from '../lib/supabase';
 import prisma from '../lib/database';
 import { CreateUserRequest, UpdateUserRequest, LoginRequest, LoginResponse } from '@shared/api';
 
@@ -343,3 +344,63 @@ router.get('/github', (req: Request, res: Response) => {
 });
 
 export default router;
+
+// Supabase admin utilities (role management via Supabase only)
+// POST /api/auth/supabase/role { email: string, role: 'ADMIN' | 'USER' }
+// Secured: caller must be Supabase admin (app_metadata.role === 'ADMIN') or match ADMIN_EMAIL
+router.post('/supabase/role', async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const bearer = authHeader && authHeader.split(' ')[1];
+    if (!bearer) {
+      return res.status(401).json(errorResponse('Unauthorized'));
+    }
+
+    // Verify requester via Supabase (server-side)
+    const { data: requester, error: getReqErr } = await supabase.auth.getUser(bearer);
+    if (getReqErr || !requester?.user) {
+      return res.status(401).json(errorResponse('Invalid token'));
+    }
+
+    const requesterEmail = requester.user.email || '';
+    const requesterRole = (requester.user.app_metadata?.role || '').toString().toUpperCase();
+    const envAdminEmail = process.env.ADMIN_EMAIL || '';
+    const isAllowed = requesterRole === 'ADMIN' || (envAdminEmail && requesterEmail === envAdminEmail);
+    if (!isAllowed) {
+      return res.status(403).json(errorResponse('Forbidden'));
+    }
+
+    const { email, role } = req.body as { email?: string; role?: string };
+    if (!email || !role || !['ADMIN', 'USER'].includes(role.toUpperCase())) {
+      return res.status(400).json(errorResponse('email and role (ADMIN|USER) are required'));
+    }
+
+    // Find target user by email
+    const { data: list, error: listErr } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1, email } as any);
+    if (listErr) {
+      return res.status(500).json(errorResponse('Failed to query Supabase users'));
+    }
+    const target = list?.users?.[0];
+    if (!target) {
+      return res.status(404).json(errorResponse('Target user not found'));
+    }
+
+    // Merge app_metadata with new role
+    const newAppMeta = {
+      ...(target.app_metadata || {}),
+      role: role.toUpperCase(),
+    } as Record<string, any>;
+
+    const { data: updated, error: updErr } = await supabase.auth.admin.updateUserById(target.id, {
+      app_metadata: newAppMeta,
+    } as any);
+    if (updErr) {
+      return res.status(500).json(errorResponse('Failed to update user role in Supabase'));
+    }
+
+    return res.json(successResponse({ id: updated.user?.id, email: updated.user?.email, app_metadata: updated.user?.app_metadata }, 'Supabase role updated'));
+  } catch (e) {
+    console.error('Supabase role update error:', e);
+    return res.status(500).json(errorResponse('Internal error'));
+  }
+});
