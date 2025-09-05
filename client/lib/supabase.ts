@@ -15,6 +15,15 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 });
 
+// Expose for debugging in browser console
+if (typeof window !== 'undefined') {
+  // window.supabase and window._supabase
+  // Usage:
+  // window.supabase.auth.getSession().then(({ data: { session } }) => console.log(session))
+  (window as any).supabase = supabase;
+  (window as any)._supabase = supabase;
+}
+
 // Auth helper functions
 export const signUpWithEmail = async (email: string, password: string, userData: { name: string; username: string }) => {
   const { data, error } = await supabase.auth.signUp({
