@@ -57,6 +57,8 @@ export default function Admin() {
   const navigate = useNavigate();
   const [isAdminAllowed, setIsAdminAllowed] = useState<boolean>(false);
   const [checkingAdmin, setCheckingAdmin] = useState<boolean>(true);
+  const [debugRole, setDebugRole] = useState<string>("");
+  const [debugEmail, setDebugEmail] = useState<string>("");
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -118,6 +120,8 @@ export default function Admin() {
         }
 
         const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || '';
+        setDebugRole(roleMeta);
+        setDebugEmail(email);
         setIsAdminAllowed(roleMeta === 'ADMIN' || (adminEmail && email === adminEmail));
       } catch (e) {
         setIsAdminAllowed(false);
@@ -239,12 +243,22 @@ export default function Admin() {
   });
 
   // If still checking or not allowed, render nothing (prevents flash/overlay)
-  if (checkingAdmin || !isAdminAllowed) {
+  // Guard: allow only configured admin email or Supabase ADMIN role
+  if (checkingAdmin) {
+    return null;
+  }
+  if (!isAdminAllowed) {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Debug banner (temporary) */}
+      <div className="fixed top-0 left-0 right-0 z-40 px-3 py-2 text-xs bg-black/60 text-gray-300 border-b border-white/10">
+        <span className="mr-4">roleMeta: <span className="text-white font-mono">{debugRole || 'N/A'}</span></span>
+        <span>email: <span className="text-white font-mono">{debugEmail || 'N/A'}</span></span>
+      </div>
+      <div className="pt-6" />
       {/* Header */}
       <header className="glass-nav border-b border-white/10 px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-7xl mx-auto">
