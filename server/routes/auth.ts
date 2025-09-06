@@ -56,11 +56,17 @@ router.post('/register', [
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // Remove password from response
+    // Remove password from response and convert dates to strings
     const { password: _, ...userWithoutPassword } = user;
+    const userResponse = {
+      ...userWithoutPassword,
+      createdAt: userWithoutPassword.createdAt.toISOString(),
+      updatedAt: userWithoutPassword.updatedAt.toISOString(),
+      lastLoginAt: userWithoutPassword.lastLoginAt?.toISOString()
+    };
 
     const response: LoginResponse = {
-      user: userWithoutPassword,
+      user: userResponse,
       accessToken,
       refreshToken
     };
@@ -106,11 +112,17 @@ router.post('/login', [
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // Remove password from response
+    // Remove password from response and convert dates to strings
     const { password: _, ...userWithoutPassword } = user;
+    const userResponse = {
+      ...userWithoutPassword,
+      createdAt: userWithoutPassword.createdAt.toISOString(),
+      updatedAt: userWithoutPassword.updatedAt.toISOString(),
+      lastLoginAt: userWithoutPassword.lastLoginAt?.toISOString()
+    };
 
     const response: LoginResponse = {
-      user: userWithoutPassword,
+      user: userResponse,
       accessToken,
       refreshToken
     };

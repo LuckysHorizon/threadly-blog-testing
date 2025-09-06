@@ -23,7 +23,7 @@ router.get('/blog/:blogId', [
     // Verify blog exists and is published
     const blog = await prisma.blog.findUnique({
       where: { id: blogId },
-      select: { status: true }
+      select: { status: true, authorId: true }
     });
     
     if (!blog) {
@@ -53,10 +53,24 @@ router.get('/blog/:blogId', [
         user: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
             avatar: true,
-            role: true
+            bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         },
         replies: {
@@ -64,10 +78,24 @@ router.get('/blog/:blogId', [
             user: {
               select: {
                 id: true,
+                email: true,
                 name: true,
                 username: true,
                 avatar: true,
-                role: true
+                bio: true,
+                role: true,
+                provider: true,
+                providerId: true,
+                twitter: true,
+                github: true,
+                linkedin: true,
+                createdAt: true,
+                updatedAt: true,
+                lastLoginAt: true,
+                articlesCount: true,
+                followersCount: true,
+                totalViews: true,
+                totalLikes: true
               }
             }
           },
@@ -84,10 +112,27 @@ router.get('/blog/:blogId', [
       ...comment,
       createdAt: comment.createdAt.toISOString(),
       updatedAt: comment.updatedAt.toISOString(),
+      user: {
+        ...comment.user,
+        email: comment.user.email || '',
+        provider: comment.user.provider || 'EMAIL',
+        createdAt: comment.user.createdAt?.toISOString() || '',
+        updatedAt: comment.user.updatedAt?.toISOString() || '',
+        lastLoginAt: comment.user.lastLoginAt?.toISOString() || undefined
+      },
       replies: comment.replies.map(reply => ({
         ...reply,
         createdAt: reply.createdAt.toISOString(),
-        updatedAt: reply.updatedAt.toISOString()
+        updatedAt: reply.updatedAt.toISOString(),
+        user: {
+          ...reply.user,
+          email: reply.user.email || '',
+          provider: reply.user.provider || 'EMAIL',
+          createdAt: reply.user.createdAt?.toISOString() || '',
+          updatedAt: reply.user.updatedAt?.toISOString() || '',
+          lastLoginAt: reply.user.lastLoginAt?.toISOString() || undefined
+        },
+        replies: [] // Replies don't have nested replies
       }))
     }));
     
@@ -147,21 +192,56 @@ router.post('/', [
         user: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
             avatar: true,
-            role: true
+            bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         },
         parent: commentData.parentId ? {
           select: {
             id: true,
             content: true,
+            parentId: true,
+            blogId: true,
+            userId: true,
+            createdAt: true,
+            updatedAt: true,
             user: {
               select: {
                 id: true,
+                email: true,
                 name: true,
-                username: true
+                username: true,
+                avatar: true,
+                bio: true,
+                role: true,
+                provider: true,
+                providerId: true,
+                twitter: true,
+                github: true,
+                linkedin: true,
+                createdAt: true,
+                updatedAt: true,
+                lastLoginAt: true,
+                articlesCount: true,
+                followersCount: true,
+                totalViews: true,
+                totalLikes: true
               }
             }
           }
@@ -215,6 +295,45 @@ router.post('/', [
       ...comment,
       createdAt: comment.createdAt.toISOString(),
       updatedAt: comment.updatedAt.toISOString(),
+      user: {
+        ...comment.user,
+        email: comment.user.email || '',
+        provider: comment.user.provider || 'EMAIL',
+        createdAt: comment.user.createdAt?.toISOString() || '',
+        updatedAt: comment.user.updatedAt?.toISOString() || '',
+        lastLoginAt: comment.user.lastLoginAt?.toISOString() || undefined
+      },
+      parent: comment.parent ? {
+        id: comment.parent.id,
+        content: comment.parent.content,
+        parentId: comment.parent.parentId,
+        replies: [],
+        blogId: comment.parent.blogId || '',
+        userId: comment.parent.userId || '',
+        user: {
+          id: comment.parent.user.id,
+          email: comment.parent.user.email || '',
+          name: comment.parent.user.name,
+          username: comment.parent.user.username,
+          avatar: comment.parent.user.avatar,
+          bio: comment.parent.user.bio,
+          role: comment.parent.user.role,
+          provider: comment.parent.user.provider || 'EMAIL',
+          providerId: comment.parent.user.providerId,
+          twitter: comment.parent.user.twitter,
+          github: comment.parent.user.github,
+          linkedin: comment.parent.user.linkedin,
+          createdAt: comment.parent.user.createdAt?.toISOString() || '',
+          updatedAt: comment.parent.user.updatedAt?.toISOString() || '',
+          lastLoginAt: comment.parent.user.lastLoginAt?.toISOString() || undefined,
+          articlesCount: comment.parent.user.articlesCount || 0,
+          followersCount: comment.parent.user.followersCount || 0,
+          totalViews: comment.parent.user.totalViews || 0,
+          totalLikes: comment.parent.user.totalLikes || 0
+        },
+        createdAt: comment.parent.createdAt.toISOString(),
+        updatedAt: comment.parent.updatedAt.toISOString()
+      } : undefined,
       replies: []
     };
     
@@ -266,10 +385,24 @@ router.put('/:id', [
         user: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
             avatar: true,
-            role: true
+            bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         }
       }
@@ -280,6 +413,14 @@ router.put('/:id', [
       ...updatedComment,
       createdAt: updatedComment.createdAt.toISOString(),
       updatedAt: updatedComment.updatedAt.toISOString(),
+      user: {
+        ...updatedComment.user,
+        email: updatedComment.user.email || '',
+        provider: updatedComment.user.provider || 'EMAIL',
+        createdAt: updatedComment.user.createdAt?.toISOString() || '',
+        updatedAt: updatedComment.user.updatedAt?.toISOString() || '',
+        lastLoginAt: updatedComment.user.lastLoginAt?.toISOString() || undefined
+      },
       replies: []
     };
     
@@ -371,10 +512,24 @@ router.get('/user/:userId', [
         user: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
             avatar: true,
-            role: true
+            bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         }
       },
@@ -388,6 +543,14 @@ router.get('/user/:userId', [
       ...comment,
       createdAt: comment.createdAt.toISOString(),
       updatedAt: comment.updatedAt.toISOString(),
+      user: {
+        ...comment.user,
+        email: comment.user.email || '',
+        provider: comment.user.provider || 'EMAIL',
+        createdAt: comment.user.createdAt?.toISOString() || '',
+        updatedAt: comment.user.updatedAt?.toISOString() || '',
+        lastLoginAt: comment.user.lastLoginAt?.toISOString() || undefined
+      },
       replies: []
     }));
     
@@ -424,10 +587,24 @@ router.get('/:id/replies', [
         user: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
             avatar: true,
-            role: true
+            bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         }
       },
@@ -439,6 +616,14 @@ router.get('/:id/replies', [
       ...reply,
       createdAt: reply.createdAt.toISOString(),
       updatedAt: reply.updatedAt.toISOString(),
+      user: {
+        ...reply.user,
+        email: reply.user.email || '',
+        provider: reply.user.provider || 'EMAIL',
+        createdAt: reply.user.createdAt?.toISOString() || '',
+        updatedAt: reply.user.updatedAt?.toISOString() || '',
+        lastLoginAt: reply.user.lastLoginAt?.toISOString() || undefined
+      },
       replies: []
     }));
     

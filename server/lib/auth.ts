@@ -31,7 +31,7 @@ export const generateAccessToken = (user: User): string => {
       role: user.role,
     },
     JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
+    { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
   );
 };
 
@@ -42,7 +42,7 @@ export const generateRefreshToken = (user: User): string => {
       email: user.email,
     },
     JWT_REFRESH_SECRET,
-    { expiresIn: JWT_REFRESH_EXPIRES_IN }
+    { expiresIn: JWT_REFRESH_EXPIRES_IN } as jwt.SignOptions
   );
 };
 

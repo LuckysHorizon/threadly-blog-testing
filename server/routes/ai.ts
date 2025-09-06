@@ -36,7 +36,7 @@ router.post('/suggest-title', [
     await prisma.aISuggestion.create({
       data: {
         type: 'TITLE_SUGGESTION',
-        content: response,
+        content: response as any,
         metadata: {
           originalContent: content.substring(0, 200), // Store first 200 chars
           category,
@@ -73,7 +73,7 @@ router.post('/suggest-tags', [
     await prisma.aISuggestion.create({
       data: {
         type: 'TAG_SUGGESTION',
-        content: response,
+        content: response as any,
         metadata: {
           originalTitle: title,
           originalContent: content.substring(0, 200),
@@ -114,7 +114,7 @@ router.post('/generate-seo', [
     await prisma.aISuggestion.create({
       data: {
         type: 'SEO_METADATA',
-        content: response,
+        content: response as any,
         metadata: {
           originalTitle: title,
           originalContent: content.substring(0, 200),
@@ -158,7 +158,7 @@ router.post('/summarize-content', [
     await prisma.aISuggestion.create({
       data: {
         type: 'CONTENT_SUMMARY',
-        content: response,
+        content: response as any,
         metadata: {
           originalContent: content.substring(0, 200),
           maxLength,
@@ -202,7 +202,7 @@ router.post('/improve-readability', [
     await prisma.aISuggestion.create({
       data: {
         type: 'READABILITY_IMPROVEMENT',
-        content: response,
+        content: response as any,
         metadata: {
           originalContent: content.substring(0, 200),
           targetAudience,
@@ -256,7 +256,6 @@ router.get('/:id', async (req: Request, res: Response) => {
     const suggestion = await prisma.aISuggestion.findFirst({
       where: {
         id,
-        userId
       }
     });
 
@@ -285,7 +284,6 @@ router.delete('/:id', async (req: Request, res: Response) => {
     const suggestion = await prisma.aISuggestion.findFirst({
       where: {
         id,
-        userId
       }
     });
 

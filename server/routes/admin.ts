@@ -44,10 +44,24 @@ router.get('/stats', async (req: Request, res: Response) => {
         author: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
             avatar: true,
-            role: true
+            bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         }
       },
@@ -60,10 +74,20 @@ router.get('/stats', async (req: Request, res: Response) => {
       where: { role: 'USER' },
       select: {
         id: true,
+        email: true,
         name: true,
         username: true,
         avatar: true,
+        bio: true,
         role: true,
+        provider: true,
+        providerId: true,
+        twitter: true,
+        github: true,
+        linkedin: true,
+        createdAt: true,
+        updatedAt: true,
+        lastLoginAt: true,
         articlesCount: true,
         followersCount: true,
         totalViews: true,
@@ -85,10 +109,20 @@ router.get('/stats', async (req: Request, res: Response) => {
         ...blog,
         publishedAt: blog.publishedAt?.toISOString() || undefined,
         createdAt: blog.createdAt.toISOString(),
-        updatedAt: blog.updatedAt.toISOString()
+        updatedAt: blog.updatedAt.toISOString(),
+        author: {
+          ...blog.author,
+          email: blog.author.email || '',
+          provider: blog.author.provider || 'EMAIL',
+          createdAt: blog.author.createdAt?.toISOString() || '',
+          updatedAt: blog.author.updatedAt?.toISOString() || '',
+          lastLoginAt: blog.author.lastLoginAt?.toISOString() || undefined
+        }
       })),
       topAuthors: topAuthors.map(user => ({
         ...user,
+        email: user.email || '',
+        provider: user.provider || 'EMAIL',
         createdAt: user.createdAt?.toISOString() || '',
         updatedAt: user.updatedAt?.toISOString() || '',
         lastLoginAt: user.lastLoginAt?.toISOString() || undefined
@@ -324,10 +358,24 @@ router.get('/blogs/pending', async (req: Request, res: Response) => {
         author: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
             avatar: true,
-            role: true
+            bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         }
       },
@@ -341,7 +389,15 @@ router.get('/blogs/pending', async (req: Request, res: Response) => {
       ...blog,
       publishedAt: blog.publishedAt?.toISOString() || undefined,
       createdAt: blog.createdAt.toISOString(),
-      updatedAt: blog.updatedAt.toISOString()
+      updatedAt: blog.updatedAt.toISOString(),
+      author: {
+        ...blog.author,
+        email: blog.author.email || '',
+        provider: blog.author.provider || 'EMAIL',
+        createdAt: blog.author.createdAt?.toISOString() || '',
+        updatedAt: blog.author.updatedAt?.toISOString() || '',
+        lastLoginAt: blog.author.lastLoginAt?.toISOString() || undefined
+      }
     }));
 
     const response = buildPaginatedResponse(transformedBlogs, total, page, limit);
@@ -406,7 +462,7 @@ router.post('/blogs/bulk-action', async (req: Request, res: Response) => {
       });
 
       const notifications = blogs.map(blog => ({
-        type: action === 'approve' ? 'BLOG_APPROVED' : 'BLOG_REJECTED',
+        type: (action === 'approve' ? 'BLOG_APPROVED' : 'BLOG_REJECTED') as any,
         title: `Blog ${action === 'approve' ? 'approved' : 'rejected'}`,
         message: action === 'approve' 
           ? `Your blog "${blog.title}" has been approved!`

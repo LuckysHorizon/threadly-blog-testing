@@ -166,7 +166,6 @@ export default function Admin() {
     action: "promote" | "demote" | "block" | "unblock",
   ) => {
     // Simulate API call
-    console.log(`${action} user ${userId}`);
     // In real app, this would update the database
   };
 
@@ -800,7 +799,8 @@ export default function Admin() {
           <div className="space-y-6">
             {/* Users List */}
             <div className="glass-card">
-              <div className="overflow-x-auto">
+              {/* Desktop Table */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-white/10">
@@ -895,6 +895,78 @@ export default function Admin() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="lg:hidden space-y-4 p-4">
+                {filteredUsers.map((author) => (
+                  <div
+                    key={author.id}
+                    className="p-4 rounded-lg bg-white/5 border border-white/10"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={author.avatar}
+                          alt={author.name}
+                          className="w-10 h-10 rounded-full"
+                        />
+                        <div>
+                          <p className="text-white font-medium text-sm">
+                            {author.name}
+                          </p>
+                          <p className="text-gray-400 text-xs">
+                            @{author.username}
+                          </p>
+                        </div>
+                      </div>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          author.role === "admin"
+                            ? "bg-yellow-500/20 text-yellow-400"
+                            : "bg-blue-500/20 text-blue-400"
+                        }`}
+                      >
+                        {author.role}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mb-3 text-xs text-gray-400">
+                      <div>
+                        <span className="block">Articles</span>
+                        <span className="text-white font-medium">{author.articlesCount}</span>
+                      </div>
+                      <div>
+                        <span className="block">Followers</span>
+                        <span className="text-white font-medium">{author.followersCount.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-400 mb-3">
+                      Joined: {author.joinedAt}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          handleUserAction(
+                            author.id,
+                            author.role === "admin"
+                              ? "demote"
+                              : "promote",
+                          )
+                        }
+                        className="glass-button text-gray-400 hover:text-white px-3 py-1 text-xs"
+                      >
+                        {author.role === "admin" ? "Demote" : "Promote"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="glass-button text-red-400 hover:text-red-300 px-3 py-1 text-xs"
+                      >
+                        Block
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

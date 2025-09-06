@@ -1,5 +1,8 @@
 import { RequestHandler } from "express";
-import { DemoResponse } from "@shared/api";
+// DemoResponse type is not exported from shared/api, defining locally
+interface DemoResponse {
+  message: string;
+}
 
 export const handleDemo: RequestHandler = (req, res) => {
   const response: DemoResponse = {

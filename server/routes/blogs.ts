@@ -83,10 +83,24 @@ router.get('/', [
         author: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
             avatar: true,
-            role: true
+            bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         }
       },
@@ -100,7 +114,15 @@ router.get('/', [
       ...blog,
       publishedAt: blog.publishedAt?.toISOString() || undefined,
       createdAt: blog.createdAt.toISOString(),
-      updatedAt: blog.updatedAt.toISOString()
+      updatedAt: blog.updatedAt.toISOString(),
+      author: {
+        ...blog.author,
+        email: blog.author.email || '',
+        provider: blog.author.provider || 'EMAIL',
+        createdAt: blog.author.createdAt?.toISOString() || '',
+        updatedAt: blog.author.updatedAt?.toISOString() || '',
+        lastLoginAt: blog.author.lastLoginAt?.toISOString() || undefined
+      }
     }));
     
     const response = buildPaginatedResponse(transformedBlogs, total, page, limit);
@@ -130,14 +152,24 @@ router.get('/:identifier', [
         author: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
             avatar: true,
-            role: true,
             bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
             twitter: true,
             github: true,
-            linkedin: true
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         },
         comments: {
@@ -231,7 +263,15 @@ router.get('/:identifier', [
       ...blog,
       publishedAt: blog.publishedAt?.toISOString() || undefined,
       createdAt: blog.createdAt.toISOString(),
-      updatedAt: blog.updatedAt.toISOString()
+      updatedAt: blog.updatedAt.toISOString(),
+      author: {
+        ...blog.author,
+        email: blog.author.email || '',
+        provider: blog.author.provider || 'EMAIL',
+        createdAt: blog.author.createdAt?.toISOString() || '',
+        updatedAt: blog.author.updatedAt?.toISOString() || '',
+        lastLoginAt: blog.author.lastLoginAt?.toISOString() || undefined
+      }
     };
     
     res.json(successResponse(transformedBlog));
@@ -273,10 +313,24 @@ router.post('/', [
         author: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
             avatar: true,
-            role: true
+            bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         }
       }
@@ -293,7 +347,15 @@ router.post('/', [
       ...blog,
       publishedAt: blog.publishedAt?.toISOString() || undefined,
       createdAt: blog.createdAt.toISOString(),
-      updatedAt: blog.updatedAt.toISOString()
+      updatedAt: blog.updatedAt.toISOString(),
+      author: {
+        ...blog.author,
+        email: blog.author.email || '',
+        provider: blog.author.provider || 'EMAIL',
+        createdAt: blog.author.createdAt?.toISOString() || '',
+        updatedAt: blog.author.updatedAt?.toISOString() || '',
+        lastLoginAt: blog.author.lastLoginAt?.toISOString() || undefined
+      }
     };
     
     res.status(201).json(successResponse(transformedBlog, 'Blog created successfully'));
@@ -357,10 +419,24 @@ router.put('/:id', [
         author: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
             avatar: true,
-            role: true
+            bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         }
       }
@@ -371,7 +447,15 @@ router.put('/:id', [
       ...updatedBlog,
       publishedAt: updatedBlog.publishedAt?.toISOString() || undefined,
       createdAt: updatedBlog.createdAt.toISOString(),
-      updatedAt: updatedBlog.updatedAt.toISOString()
+      updatedAt: updatedBlog.updatedAt.toISOString(),
+      author: {
+        ...updatedBlog.author,
+        email: updatedBlog.author.email || '',
+        provider: updatedBlog.author.provider || 'EMAIL',
+        createdAt: updatedBlog.author.createdAt?.toISOString() || '',
+        updatedAt: updatedBlog.author.updatedAt?.toISOString() || '',
+        lastLoginAt: updatedBlog.author.lastLoginAt?.toISOString() || undefined
+      }
     };
     
     res.json(successResponse(transformedBlog, 'Blog updated successfully'));
@@ -449,9 +533,24 @@ router.put('/:id/status', [
         author: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
-            email: true
+            avatar: true,
+            bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         }
       }
@@ -475,7 +574,15 @@ router.put('/:id/status', [
       ...updatedBlog,
       publishedAt: updatedBlog.publishedAt?.toISOString() || undefined,
       createdAt: updatedBlog.createdAt.toISOString(),
-      updatedAt: updatedBlog.updatedAt.toISOString()
+      updatedAt: updatedBlog.updatedAt.toISOString(),
+      author: {
+        ...updatedBlog.author,
+        email: updatedBlog.author.email || '',
+        provider: 'EMAIL' as const,
+        createdAt: '',
+        updatedAt: '',
+        lastLoginAt: undefined
+      }
     };
     
     res.json(successResponse(transformedBlog, `Blog ${status.toLowerCase()} successfully`));
@@ -569,10 +676,24 @@ router.get('/trending/trending', async (req: Request, res: Response) => {
         author: {
           select: {
             id: true,
+            email: true,
             name: true,
             username: true,
             avatar: true,
-            role: true
+            bio: true,
+            role: true,
+            provider: true,
+            providerId: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true
           }
         }
       },
@@ -587,7 +708,15 @@ router.get('/trending/trending', async (req: Request, res: Response) => {
       ...blog,
       publishedAt: blog.publishedAt?.toISOString() || undefined,
       createdAt: blog.createdAt.toISOString(),
-      updatedAt: blog.updatedAt.toISOString()
+      updatedAt: blog.updatedAt.toISOString(),
+      author: {
+        ...blog.author,
+        email: blog.author.email || '',
+        provider: blog.author.provider || 'EMAIL',
+        createdAt: blog.author.createdAt?.toISOString() || '',
+        updatedAt: blog.author.updatedAt?.toISOString() || '',
+        lastLoginAt: blog.author.lastLoginAt?.toISOString() || undefined
+      }
     }));
     
     res.json(successResponse(transformedBlogs));

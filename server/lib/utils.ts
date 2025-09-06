@@ -8,7 +8,7 @@ export const generateSlug = (title: string): string => {
     .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens with single
-    .trim('-'); // Remove leading/trailing hyphens
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 };
 
 // Generate unique slug by appending number if needed
