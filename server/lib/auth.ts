@@ -114,6 +114,10 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
           uniqueUsername = `${preferredUsername}${suffix++}`;
         }
 
+        // Determine role from Supabase app_metadata or default to USER
+        const supabaseRole = supabaseUser.app_metadata?.role?.toString().toUpperCase();
+        const userRole = supabaseRole === 'ADMIN' ? 'ADMIN' : 'USER';
+
         appUser = await prisma.user.create({
           data: {
             // Use Supabase UUID as primary id to link identities
@@ -123,6 +127,7 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
               || supabaseUser.user_metadata?.full_name
               || userEmail.split('@')[0],
             username: uniqueUsername,
+            role: userRole,
             provider: 'EMAIL',
             providerId: supabaseUser.id,
             avatar: supabaseUser.user_metadata?.avatar_url
@@ -130,6 +135,15 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
               || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uniqueUsername}`,
           }
         });
+      } else {
+        // Update existing user's role if it changed in Supabase
+        const supabaseRole = supabaseUser.app_metadata?.role?.toString().toUpperCase();
+        if (supabaseRole && supabaseRole !== appUser.role) {
+          appUser = await prisma.user.update({
+            where: { id: appUser.id },
+            data: { role: supabaseRole as 'ADMIN' | 'USER' }
+          });
+        }
       }
 
       req.user = {

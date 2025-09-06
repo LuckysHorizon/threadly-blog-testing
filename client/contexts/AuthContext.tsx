@@ -157,13 +157,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             console.warn('Server role sync failed:', e);
           }
           setUser(nextUser);
-          // Redirect based on Supabase role OR configured admin email as fallback
+          // Redirect based on server role (which includes Supabase role)
           try {
-            const roleMeta = (session.user.app_metadata?.role || '').toString().toUpperCase();
-            const email = session.user.email || '';
-            const envAdminEmail = import.meta.env.VITE_ADMIN_EMAIL || '';
-            const isAdmin = roleMeta === 'ADMIN' || (envAdminEmail && email === envAdminEmail) || nextUser.role === 'admin';
-            if (isAdmin) {
+            if (nextUser.role === 'admin') {
               window.location.replace('/admin');
             }
           } catch {}
@@ -182,36 +178,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Env-based hardcoded admin login (requested)
-      const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || '';
-      const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || '';
-      const ADMIN_NAME = import.meta.env.VITE_ADMIN_NAME || 'Administrator';
-      const ADMIN_AVATAR =
-        import.meta.env.VITE_ADMIN_AVATAR ||
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=admin';
-
-      if (ADMIN_EMAIL && email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        const adminUser: User = {
-          id: 'admin-local',
-          name: ADMIN_NAME,
-          username: 'admin',
-          email: ADMIN_EMAIL,
-          avatar: ADMIN_AVATAR,
-          role: 'admin',
-          bio: 'Administrator',
-          socialLinks: {},
-          joinedAt: new Date().toISOString().split('T')[0],
-          articlesCount: 0,
-          followersCount: 0,
-          provider: 'email',
-        };
-        setUser(adminUser);
-        localStorage.setItem('aiblog_user', JSON.stringify(adminUser));
-        // Optional redirect
-        try { window.location.replace('/admin'); } catch {}
-        return;
-      }
-
+      // Always authenticate through Supabase
       await signInWithEmail(email, password);
       // User state will be updated by the auth state change listener
     } catch (error) {
