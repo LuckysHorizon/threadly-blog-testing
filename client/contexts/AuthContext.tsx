@@ -107,27 +107,27 @@ async function syncUserWithPrisma(supabaseUser: SupabaseUser, accessToken: strin
     // Determine the correct role
     const correctRole = (supabaseRole === 'ADMIN' || isAdminEmail) ? 'admin' : 'user';
     
-    // If we have server data, use it and ensure role is correct
+    // If we have server data, use it directly (server already handled role sync)
     if (serverUser && serverUser.id) {
       const normalizedRole = serverUser.role?.toString().toUpperCase() === 'ADMIN' ? 'admin' : 'user';
       
       return {
         id: serverUser.id as string,
-        name: (serverUser.name as string) || userMetadata.name || userMetadata.full_name || 'User',
-        username: (serverUser.username as string) || userMetadata.username || userMetadata.preferred_username || supabaseUser.email?.split('@')[0] || 'user',
-        email: supabaseUser.email || '',
-        avatar: (serverUser.avatar as string) || userMetadata.avatar_url || userMetadata.picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${supabaseUser.id}`,
-        role: correctRole, // Always use the correct role from Supabase
-        bio: (serverUser.bio as string) || userMetadata.bio || '',
+        name: (serverUser.name as string) || 'User',
+        username: (serverUser.username as string) || 'user',
+        email: (serverUser.email as string) || '',
+        avatar: (serverUser.avatar as string) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${serverUser.id}`,
+        role: normalizedRole,
+        bio: (serverUser.bio as string) || '',
         socialLinks: {
-          twitter: (serverUser.twitter as string) || userMetadata.twitter,
-          github: (serverUser.github as string) || userMetadata.github,
-          linkedin: (serverUser.linkedin as string) || userMetadata.linkedin,
+          twitter: (serverUser.twitter as string) || '',
+          github: (serverUser.github as string) || '',
+          linkedin: (serverUser.linkedin as string) || '',
         },
         joinedAt: serverUser.createdAt ? new Date(serverUser.createdAt as string).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         articlesCount: (serverUser.articlesCount as number) || 0,
         followersCount: (serverUser.followersCount as number) || 0,
-        provider: supabaseUser.app_metadata?.provider || 'email',
+        provider: (serverUser.provider as string) || 'email',
       };
     }
     

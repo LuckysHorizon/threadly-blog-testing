@@ -75,7 +75,9 @@ export function createServer() {
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
   // Static file serving for uploads
-  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+  const __dirname = path.dirname(new URL(import.meta.url).pathname);
+  const uploadsPath = path.join(__dirname, '../uploads');
+  app.use('/uploads', express.static(uploadsPath));
 
   // Health check endpoint
   app.get("/health", (_req, res) => {
@@ -161,7 +163,12 @@ export function createServer() {
 }
 
 // Start the server if this file is run directly
-if (require.main === module) {
+const isMainModule = import.meta.url === `file://${process.argv[1]}` || 
+                     import.meta.url.endsWith(process.argv[1]) ||
+                     process.argv[1]?.includes('server/index.ts') ||
+                     process.argv[1]?.includes('server/index.js');
+
+if (isMainModule) {
   const app = createServer();
   const PORT = process.env.PORT || 8080;
   

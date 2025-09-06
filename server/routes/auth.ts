@@ -144,7 +144,8 @@ router.post('/refresh', async (req: Request, res: Response) => {
     }
 
     // Verify refresh token
-    const decoded = require('jsonwebtoken').verify(
+    const jwt = await import('jsonwebtoken');
+    const decoded = jwt.default.verify(
       refreshToken,
       process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret'
     );
@@ -172,14 +173,32 @@ router.post('/refresh', async (req: Request, res: Response) => {
   }
 });
 
-// Get current user profile
-router.get('/me', authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user.userId;
-    const userEmail = (req as any).user.email;
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
+// Get current user profile (Supabase-based) - Real implementation
+router.get('/me', async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const bearer = authHeader && authHeader.split(' ')[1];
+    
+    if (!bearer) {
+      return res.status(401).json(errorResponse('No authorization token provided'));
+    }
+
+    // Verify Supabase token
+    const { data: supabaseUser, error: supabaseError } = await supabase.auth.getUser(bearer);
+    
+    if (supabaseError || !supabaseUser?.user) {
+      return res.status(401).json(errorResponse('Invalid Supabase token'));
+    }
+
+    const userEmail = supabaseUser.user.email;
+    if (!userEmail) {
+      return res.status(400).json(errorResponse('No email found in Supabase user'));
+    }
+
+    // Check if user exists in Prisma
+    let prismaUser = await prisma.user.findFirst({
+      where: { email: userEmail },
       select: {
         id: true,
         email: true,
@@ -202,15 +221,39 @@ router.get('/me', authenticateToken, async (req: Request, res: Response) => {
       }
     });
 
-    if (!user) {
-      return res.status(404).json(errorResponse('User not found'));
-    }
+    // Determine correct role from Supabase
+    const supabaseRole = supabaseUser.user.app_metadata?.role?.toString().toUpperCase();
+    const isAdminEmail = userEmail === 'admin@threadly.com';
+    const correctRole = (supabaseRole === 'ADMIN' || isAdminEmail) ? 'ADMIN' : 'USER';
 
-    // Ensure admin@threadly.com always has admin role
-    if (userEmail === 'admin@threadly.com' && user.role !== 'ADMIN') {
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: { role: 'ADMIN' },
+    // If user doesn't exist in Prisma, create them
+    if (!prismaUser) {
+      const userMetadata = supabaseUser.user.user_metadata || {};
+      const username = userMetadata.username || userMetadata.preferred_username || userEmail.split('@')[0];
+      
+      // Ensure username is unique
+      let uniqueUsername = username;
+      let counter = 1;
+      while (await prisma.user.findFirst({ where: { username: uniqueUsername } })) {
+        uniqueUsername = `${username}${counter}`;
+        counter++;
+      }
+
+      prismaUser = await prisma.user.create({
+        data: {
+          id: supabaseUser.user.id,
+          email: userEmail,
+          name: userMetadata.name || userMetadata.full_name || userEmail.split('@')[0],
+          username: uniqueUsername,
+          role: correctRole,
+          provider: 'EMAIL',
+          providerId: supabaseUser.user.id,
+          avatar: userMetadata.avatar_url || userMetadata.picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uniqueUsername}`,
+          bio: userMetadata.bio || '',
+          twitter: userMetadata.twitter,
+          github: userMetadata.github,
+          linkedin: userMetadata.linkedin,
+        },
         select: {
           id: true,
           email: true,
@@ -232,10 +275,45 @@ router.get('/me', authenticateToken, async (req: Request, res: Response) => {
           totalLikes: true,
         }
       });
-      return res.json(successResponse(updatedUser));
+    } else {
+      // Update existing user's role if it changed in Supabase
+      if (prismaUser.role !== correctRole) {
+        prismaUser = await prisma.user.update({
+          where: { id: prismaUser.id },
+          data: { role: correctRole },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            username: true,
+            avatar: true,
+            bio: true,
+            role: true,
+            provider: true,
+            twitter: true,
+            github: true,
+            linkedin: true,
+            createdAt: true,
+            updatedAt: true,
+            lastLoginAt: true,
+            articlesCount: true,
+            followersCount: true,
+            totalViews: true,
+            totalLikes: true,
+          }
+        });
+      }
     }
 
-    res.json(successResponse(user));
+    // Convert dates to strings for JSON response
+    const userResponse = {
+      ...prismaUser,
+      createdAt: prismaUser.createdAt.toISOString(),
+      updatedAt: prismaUser.updatedAt.toISOString(),
+      lastLoginAt: prismaUser.lastLoginAt?.toISOString()
+    };
+
+    res.json(successResponse(userResponse));
   } catch (error) {
     console.error('Get profile error:', error);
     res.status(500).json(errorResponse('Failed to get profile'));
