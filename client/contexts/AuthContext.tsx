@@ -159,14 +159,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(nextUser);
           
           // Handle redirects based on authentication event and user role
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            // Only redirect on sign in or token refresh, not on initial load
+          if (event === 'SIGNED_IN') {
+            // Only redirect on explicit sign in, not on initial load or token refresh
             const currentPath = window.location.pathname;
             if (nextUser.role === 'admin') {
-              // Use navigate instead of window.location.replace for better UX
-              if (currentPath !== '/admin' && !currentPath.startsWith('/admin/')) {
-                window.location.href = '/admin';
-              }
+              // Don't auto-redirect admin users - let them choose where to go
+              // They can use the Dashboard button in nav or admin greeting
             } else if (currentPath === '/admin' || currentPath.startsWith('/admin/')) {
               // If user is not admin but on admin page, redirect to home
               window.location.href = '/';

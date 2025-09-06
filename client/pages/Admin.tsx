@@ -53,10 +53,8 @@ interface Comment {
 }
 
 export default function Admin() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
-  const [isAdminAllowed, setIsAdminAllowed] = useState<boolean>(false);
-  const [checkingAdmin, setCheckingAdmin] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -89,46 +87,8 @@ export default function Admin() {
       )
       .replace(/\n/g, "<br>");
 
-  // Access control: verify role with Supabase only
-  useEffect(() => {
-    const checkAdmin = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-          setIsAdminAllowed(false);
-          setCheckingAdmin(false);
-          return;
-        }
-        // Prefer fresh user payload from Supabase (ensures latest app_metadata)
-        let roleMeta = (session.user.app_metadata?.role || '').toString().toUpperCase();
-        let email = session.user.email || '';
-
-        if (!roleMeta) {
-          const { data: userData } = await supabase.auth.getUser();
-          roleMeta = (userData?.user?.app_metadata?.role || '').toString().toUpperCase();
-          email = userData?.user?.email || email;
-        }
-
-        if (!roleMeta) {
-          // Force refresh then retry once
-          await supabase.auth.refreshSession();
-          const { data: userData } = await supabase.auth.getUser();
-          roleMeta = (userData?.user?.app_metadata?.role || '').toString().toUpperCase();
-          email = userData?.user?.email || email;
-        }
-
-        const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || '';
-        setIsAdminAllowed(roleMeta === 'ADMIN' || (adminEmail && email === adminEmail));
-      } catch (e) {
-        setIsAdminAllowed(false);
-      } finally {
-        setCheckingAdmin(false);
-      }
-    };
-    checkAdmin();
-  }, []);
-
-  // Removed redirect; non-admins simply render nothing
+  // Simple admin check using AuthContext
+  const isAdmin = isAuthenticated && user?.role === 'admin';
 
   // Mock admin stats
   const adminStats: AdminStats = {
@@ -238,12 +198,21 @@ export default function Admin() {
     return matchesSearch;
   });
 
-  // If still checking or not allowed, render nothing (prevents flash/overlay)
-  // Guard: allow only configured admin email or Supabase ADMIN role
-  if (checkingAdmin) {
-    return null;
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
-  if (!isAdminAllowed) {
+
+  // If not authenticated or not admin, redirect to home
+  if (!isAuthenticated || !isAdmin) {
+    navigate('/', { replace: true });
     return null;
   }
 

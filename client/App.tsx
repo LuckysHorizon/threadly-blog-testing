@@ -10,7 +10,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { PostsProvider } from "./contexts/PostsContext";
 import { CommentsProvider } from "./contexts/CommentsContext";
 import Layout from "./components/Layout";
-import AdminRouteGuard from "./components/AdminRouteGuard";
 import Index from "./pages/Index";
 import Blogs from "./pages/Blogs";
 import BlogPost from "./pages/BlogPost";
@@ -38,11 +37,7 @@ const App = () => (
                   <Route path="/blogs" element={<Blogs />} />
                   <Route path="/blog/:id" element={<BlogPost />} />
                   <Route path="/write" element={<Write />} />
-                  <Route path="/admin" element={
-                    <AdminRouteGuard>
-                      <Admin />
-                    </AdminRouteGuard>
-                  } />
+                  <Route path="/admin" element={<Admin />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route
                     path="/categories"
