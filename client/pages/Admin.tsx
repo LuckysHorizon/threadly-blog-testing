@@ -21,36 +21,14 @@ import {
   ArrowUp,
   ArrowDown,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { mockAuthors, getAuthorById, Author, BlogPost } from "@/lib/mockData";
-import { usePosts } from "@/contexts/PostsContext";
-import { useComments } from "@/contexts/CommentsContext";
+import { AdminStats, User, Blog, Comment } from "@shared/api";
 
 type Tab = "overview" | "blogs" | "comments" | "users" | "analytics";
-
-interface AdminStats {
-  totalUsers: number;
-  totalBlogs: number;
-  pendingBlogs: number;
-  publishedBlogs: number;
-  totalViews: number;
-  totalLikes: number;
-  totalComments: number;
-  newUsersThisMonth: number;
-}
-
-interface Comment {
-  id: string;
-  content: string;
-  authorId: string;
-  blogId: string;
-  blogTitle: string;
-  createdAt: string;
-  status: "approved" | "pending" | "rejected";
-}
 
 export default function Admin() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -58,9 +36,66 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const { posts: blogs, updatePost, deletePost } = usePosts();
-  const { comments, moderateComment, deleteComment } = useComments();
-  const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
+  const [previewPost, setPreviewPost] = useState<Blog | null>(null);
+  
+  // Real data state
+  const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load admin data
+  useEffect(() => {
+    const loadAdminData = async () => {
+      if (!isAuthenticated || user?.role !== 'admin') return;
+      
+      setDataLoading(true);
+      setError(null);
+      
+      try {
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        if (!token) throw new Error('No access token');
+
+        // Load admin stats
+        const statsResponse = await fetch('/api/admin/stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!statsResponse.ok) throw new Error('Failed to load stats');
+        const statsData = await statsResponse.json();
+        setAdminStats(statsData.data);
+
+        // Load users
+        const usersResponse = await fetch('/api/admin/users', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!usersResponse.ok) throw new Error('Failed to load users');
+        const usersData = await usersResponse.json();
+        setUsers(usersData.data.data);
+
+        // Load pending blogs
+        const blogsResponse = await fetch('/api/admin/blogs/pending', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!blogsResponse.ok) throw new Error('Failed to load blogs');
+        const blogsData = await blogsResponse.json();
+        setBlogs(blogsData.data.data);
+
+        // Load comments (using existing context for now)
+        // TODO: Implement real comments API
+        setComments([]);
+
+      } catch (err) {
+        console.error('Failed to load admin data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+      } finally {
+        setDataLoading(false);
+      }
+    };
+
+    loadAdminData();
+  }, [isAuthenticated, user?.role]);
 
   const renderMarkdown = (text: string) =>
     text
@@ -90,62 +125,53 @@ export default function Admin() {
   // Simple admin check using AuthContext
   const isAdmin = isAuthenticated && user?.role === 'admin';
 
-  // Mock admin stats
-  const adminStats: AdminStats = {
-    totalUsers: mockAuthors.length,
-    totalBlogs: blogs.length,
-    pendingBlogs: blogs.filter((p) => p.status === "pending").length,
-    publishedBlogs: blogs.filter((p) => p.status === "published").length,
-    totalViews: blogs.reduce((sum, post) => sum + post.stats.views, 0),
-    totalLikes: blogs.reduce((sum, post) => sum + post.stats.likes, 0),
-    totalComments: blogs.reduce((sum, post) => sum + post.stats.comments, 0),
-    newUsersThisMonth: 12,
-  };
-
-  // Mock comments data
-  const mockComments: Comment[] = [
-    {
-      id: "1",
-      content:
-        "Great article! Really helped me understand the concepts better.",
-      authorId: "user-1",
-      blogId: "1",
-      blogTitle: "The Future of Artificial Intelligence",
-      createdAt: "2 hours ago",
-      status: "approved",
-    },
-    {
-      id: "2",
-      content: "This is spam content that should be moderated...",
-      authorId: "user-2",
-      blogId: "2",
-      blogTitle: "Machine Learning Algorithms Explained",
-      createdAt: "5 hours ago",
-      status: "pending",
-    },
-    {
-      id: "3",
-      content: "Inappropriate comment that was flagged by users.",
-      authorId: "user-3",
-      blogId: "3",
-      blogTitle: "ChatGPT vs Claude vs Gemini",
-      createdAt: "1 day ago",
-      status: "rejected",
-    },
-  ];
-
   // Handle blog actions
   const handleBlogAction = async (
     blogId: string,
     action: "approve" | "reject" | "delete",
   ) => {
-    if (action === "delete") {
-      deletePost(blogId);
-      return;
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) throw new Error('No access token');
+
+      const response = await fetch('/api/admin/blogs/bulk-action', {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          blogIds: [blogId],
+          action: action === "approve" ? "approve" : action === "reject" ? "reject" : "delete"
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to perform action');
+
+      // Refresh data
+      const loadAdminData = async () => {
+        const statsResponse = await fetch('/api/admin/stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          setAdminStats(statsData.data);
+        }
+
+        const blogsResponse = await fetch('/api/admin/blogs/pending', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (blogsResponse.ok) {
+          const blogsData = await blogsResponse.json();
+          setBlogs(blogsData.data.data);
+        }
+      };
+
+      loadAdminData();
+    } catch (err) {
+      console.error('Failed to perform blog action:', err);
+      setError(err instanceof Error ? err.message : 'Failed to perform action');
     }
-    updatePost(blogId, {
-      status: action === "approve" ? "published" : "draft",
-    });
   };
 
   // Handle comment actions
@@ -153,11 +179,8 @@ export default function Admin() {
     commentId: string,
     action: "approve" | "reject" | "delete",
   ) => {
-    if (action === "delete") {
-      deleteComment(commentId);
-      return;
-    }
-    moderateComment(commentId, action === "approve" ? "approved" : "rejected");
+    // TODO: Implement real comment moderation API
+    console.log(`${action} comment ${commentId}`);
   };
 
   // Handle user actions
@@ -165,8 +188,37 @@ export default function Admin() {
     userId: string,
     action: "promote" | "demote" | "block" | "unblock",
   ) => {
-    // Simulate API call
-    // In real app, this would update the database
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) throw new Error('No access token');
+
+      if (action === "promote" || action === "demote") {
+        const response = await fetch(`/api/admin/users/${userId}/role`, {
+          method: 'PUT',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            role: action === "promote" ? "ADMIN" : "USER"
+          })
+        });
+
+        if (!response.ok) throw new Error('Failed to update user role');
+
+        // Refresh users data
+        const usersResponse = await fetch('/api/admin/users', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (usersResponse.ok) {
+          const usersData = await usersResponse.json();
+          setUsers(usersData.data.data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to perform user action:', err);
+      setError(err instanceof Error ? err.message : 'Failed to perform action');
+    }
   };
 
   // Filter data based on search and status
@@ -175,7 +227,7 @@ export default function Admin() {
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesStatus =
-      filterStatus === "all" || blog.status === filterStatus;
+      filterStatus === "all" || blog.status.toLowerCase() === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
@@ -185,25 +237,24 @@ export default function Admin() {
     const blogTitle = post?.title?.toLowerCase() ?? "";
     const matchesSearch =
       comment.content.toLowerCase().includes(q) || blogTitle.includes(q);
-    const matchesStatus =
-      filterStatus === "all" || comment.status === filterStatus;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
-  const filteredUsers = mockAuthors.filter((author) => {
+  const filteredUsers = users.filter((user) => {
     const matchesSearch =
-      author.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      author.email.toLowerCase().includes(searchQuery.toLowerCase());
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.username.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
 
   // Show loading while checking authentication
-  if (isLoading) {
+  if (isLoading || dataLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <Loader2 className="h-12 w-12 animate-spin text-brand-400 mx-auto mb-4" />
+          <p className="text-gray-300">Loading admin dashboard...</p>
         </div>
       </div>
     );
@@ -213,6 +264,33 @@ export default function Admin() {
   if (!isAuthenticated || !isAdmin) {
     navigate('/', { replace: true });
     return null;
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+          <p className="text-red-400 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state if no data yet
+  if (!adminStats) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-brand-400 mx-auto mb-4" />
+          <p className="text-gray-300">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -272,13 +350,13 @@ export default function Admin() {
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main Content - Added proper spacing */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
         {/* Overview Tab */}
         {activeTab === "overview" && (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {[
                 {
                   label: "Total Users",
@@ -305,16 +383,16 @@ export default function Admin() {
                   color: "purple",
                 },
               ].map((stat, index) => (
-                <div key={index} className="glass-card p-6">
+                <div key={index} className="glass-card p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-400 text-sm">{stat.label}</p>
-                      <p className="text-2xl font-bold text-white mt-1">
+                      <p className="text-gray-400 text-xs sm:text-sm">{stat.label}</p>
+                      <p className="text-xl sm:text-2xl font-bold text-white mt-1">
                         {stat.value}
                       </p>
                     </div>
                     <div
-                      className={`p-3 rounded-xl bg-gradient-to-r ${
+                      className={`p-2 sm:p-3 rounded-xl bg-gradient-to-r ${
                         stat.color === "blue"
                           ? "from-blue-500/20 to-cyan-500/20"
                           : stat.color === "green"
@@ -325,7 +403,7 @@ export default function Admin() {
                       }`}
                     >
                       <stat.icon
-                        className={`h-6 w-6 ${
+                        className={`h-5 w-5 sm:h-6 sm:w-6 ${
                           stat.color === "blue"
                             ? "text-blue-400"
                             : stat.color === "green"
@@ -342,87 +420,97 @@ export default function Admin() {
             </div>
 
             {/* Recent Activity & Quick Actions */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
               {/* Pending Approvals */}
-              <div className="glass-card p-6">
+              <div className="glass-card p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                   <AlertTriangle className="h-5 w-5 text-yellow-400 mr-2" />
                   Pending Approvals
                 </h3>
                 <div className="space-y-3">
                   {blogs
-                    .filter((p) => p.status === "pending")
-                    .map((post) => {
-                      const author = getAuthorById(post.authorId);
-                      return (
-                        <div
-                          key={post.id}
-                          className="flex items-center justify-between p-3 rounded-lg bg-white/5"
-                        >
-                          <div>
-                            <p className="text-white text-sm font-medium truncate">
-                              {post.title}
-                            </p>
-                            <p className="text-gray-400 text-xs">
-                              by {author?.name}
-                            </p>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              onClick={() => setPreviewPost(post)}
-                              className="glass-button text-white px-3 py-1 text-xs"
-                            >
-                              <Eye className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() =>
-                                handleBlogAction(post.id, "approve")
-                              }
-                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs"
-                            >
-                              <CheckCircle className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() =>
-                                handleBlogAction(post.id, "reject")
-                              }
-                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs"
-                            >
-                              <XCircle className="h-3 w-3" />
-                            </Button>
-                          </div>
+                    .filter((blog) => blog.status === "PENDING")
+                    .slice(0, 5)
+                    .map((blog) => (
+                      <div
+                        key={blog.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-white/5"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm font-medium truncate">
+                            {blog.title}
+                          </p>
+                          <p className="text-gray-400 text-xs">
+                            by {blog.author.name}
+                          </p>
                         </div>
-                      );
-                    })}
+                        <div className="flex space-x-2 ml-2">
+                          <Button
+                            size="sm"
+                            onClick={() => setPreviewPost(blog)}
+                            className="glass-button text-white px-2 py-1 text-xs"
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleBlogAction(blog.id, "approve")
+                            }
+                            className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 text-xs"
+                          >
+                            <CheckCircle className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleBlogAction(blog.id, "reject")
+                            }
+                            className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 text-xs"
+                          >
+                            <XCircle className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  {blogs.filter((blog) => blog.status === "PENDING").length === 0 && (
+                    <p className="text-gray-400 text-sm text-center py-4">
+                      No pending approvals
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* Quick Stats */}
-              <div className="glass-card p-6">
+              <div className="glass-card p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-white mb-4">
                   Platform Health
                 </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Engagement Rate</span>
-                    <span className="text-green-400 font-medium">↑ 12.5%</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">New Users (30d)</span>
-                    <span className="text-blue-400 font-medium">
-                      {adminStats.newUsersThisMonth}
+                    <span className="text-gray-400 text-sm">Total Likes</span>
+                    <span className="text-green-400 font-medium text-sm">
+                      {adminStats.totalLikes.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Content Quality Score</span>
-                    <span className="text-green-400 font-medium">94/100</span>
+                    <span className="text-gray-400 text-sm">Total Comments</span>
+                    <span className="text-blue-400 font-medium text-sm">
+                      {adminStats.totalComments.toLocaleString()}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Server Uptime</span>
-                    <span className="text-green-400 font-medium">99.9%</span>
+                    <span className="text-gray-400 text-sm">Avg. Views per Blog</span>
+                    <span className="text-green-400 font-medium text-sm">
+                      {adminStats.totalBlogs > 0 
+                        ? Math.round(adminStats.totalViews / adminStats.totalBlogs)
+                        : 0
+                      }
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400 text-sm">System Status</span>
+                    <span className="text-green-400 font-medium text-sm">Healthy</span>
                   </div>
                 </div>
               </div>
@@ -432,25 +520,25 @@ export default function Admin() {
 
         {/* Blogs Tab */}
         {activeTab === "blogs" && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Filters */}
             <div className="glass-card p-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                  <div className="relative w-full sm:w-auto">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search blogs..."
-                      className="pl-10 pr-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      className="w-full sm:w-64 pl-10 pr-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
                     />
                   </div>
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full sm:w-auto px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
                   >
                     <option value="all" className="bg-gray-900">
                       All Status
@@ -500,200 +588,188 @@ export default function Admin() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredBlogs.map((blog) => {
-                      const author = getAuthorById(blog.authorId);
-                      return (
-                        <tr
-                          key={blog.id}
-                          className="border-b border-white/5 hover:bg-white/5"
-                        >
-                          <td className="p-4">
-                            <div>
-                              <p className="text-white font-medium truncate max-w-xs">
-                                {blog.title}
-                              </p>
-                              <p className="text-gray-400 text-sm">
-                                {blog.category}
-                              </p>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center space-x-2">
-                              <img
-                                src={author?.avatar}
-                                alt={author?.name}
-                                className="w-6 h-6 rounded-full"
-                              />
-                              <span className="text-white text-sm">
-                                {author?.name}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs ${
-                                blog.status === "published"
-                                  ? "bg-green-500/20 text-green-400"
-                                  : blog.status === "pending"
-                                    ? "bg-yellow-500/20 text-yellow-400"
-                                    : "bg-gray-500/20 text-gray-400"
-                              }`}
-                            >
-                              {blog.status}
+                    {filteredBlogs.map((blog) => (
+                      <tr
+                        key={blog.id}
+                        className="border-b border-white/5 hover:bg-white/5"
+                      >
+                        <td className="p-4">
+                          <div>
+                            <p className="text-white font-medium truncate max-w-xs">
+                              {blog.title}
+                            </p>
+                            <p className="text-gray-400 text-sm">
+                              {blog.category}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center space-x-2">
+                            <img
+                              src={blog.author.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${blog.author.username}`}
+                              alt={blog.author.name}
+                              className="w-6 h-6 rounded-full"
+                            />
+                            <span className="text-white text-sm">
+                              {blog.author.name}
                             </span>
-                          </td>
-                          <td className="p-4 text-white text-sm">
-                            {blog.stats.views.toLocaleString()}
-                          </td>
-                          <td className="p-4 text-gray-400 text-sm">
-                            {blog.publishedAt}
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center space-x-2">
-                              <Button
-                                size="sm"
-                                onClick={() => setPreviewPost(blog)}
-                                className="glass-button text-gray-300 hover:text-white px-2 py-1"
-                              >
-                                <Eye className="h-3 w-3" />
-                              </Button>
-                              {blog.status === "pending" && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    onClick={() =>
-                                      handleBlogAction(blog.id, "approve")
-                                    }
-                                    className="bg-green-600 hover:bg-green-700 text-white px-2 py-1"
-                                  >
-                                    <CheckCircle className="h-3 w-3" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    onClick={() =>
-                                      handleBlogAction(blog.id, "reject")
-                                    }
-                                    className="bg-red-600 hover:bg-red-700 text-white px-2 py-1"
-                                  >
-                                    <XCircle className="h-3 w-3" />
-                                  </Button>
-                                </>
-                              )}
-                              <Button
-                                size="sm"
-                                className="glass-button text-gray-400 hover:text-white px-2 py-1"
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() =>
-                                  handleBlogAction(blog.id, "delete")
-                                }
-                                className="glass-button text-red-400 hover:text-red-300 px-2 py-1"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${
+                              blog.status === "PUBLISHED"
+                                ? "bg-green-500/20 text-green-400"
+                                : blog.status === "PENDING"
+                                  ? "bg-yellow-500/20 text-yellow-400"
+                                  : "bg-gray-500/20 text-gray-400"
+                            }`}
+                          >
+                            {blog.status.toLowerCase()}
+                          </span>
+                        </td>
+                        <td className="p-4 text-white text-sm">
+                          {blog.views.toLocaleString()}
+                        </td>
+                        <td className="p-4 text-gray-400 text-sm">
+                          {blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString() : 'Not published'}
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              size="sm"
+                              onClick={() => setPreviewPost(blog)}
+                              className="glass-button text-gray-300 hover:text-white px-2 py-1"
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            {blog.status === "PENDING" && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() =>
+                                    handleBlogAction(blog.id, "approve")
+                                  }
+                                  className="bg-green-600 hover:bg-green-700 text-white px-2 py-1"
+                                >
+                                  <CheckCircle className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() =>
+                                    handleBlogAction(blog.id, "reject")
+                                  }
+                                  className="bg-red-600 hover:bg-red-700 text-white px-2 py-1"
+                                >
+                                  <XCircle className="h-3 w-3" />
+                                </Button>
+                              </>
+                            )}
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleBlogAction(blog.id, "delete")
+                              }
+                              className="glass-button text-red-400 hover:text-red-300 px-2 py-1"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
 
               {/* Mobile Cards */}
               <div className="lg:hidden space-y-4 p-4">
-                {filteredBlogs.map((blog) => {
-                  const author = getAuthorById(blog.authorId);
-                  return (
-                    <div
-                      key={blog.id}
-                      className="p-4 rounded-lg bg-white/5 border border-white/10"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h4 className="text-white font-medium text-sm mb-1 line-clamp-2">
-                            {blog.title}
-                          </h4>
-                          <p className="text-gray-400 text-xs mb-2">
-                            {blog.category}
-                          </p>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <img
-                              src={author?.avatar}
-                              alt={author?.name}
-                              className="w-5 h-5 rounded-full"
-                            />
-                            <span className="text-white text-xs">
-                              {author?.name}
-                            </span>
-                          </div>
+                {filteredBlogs.map((blog) => (
+                  <div
+                    key={blog.id}
+                    className="p-4 rounded-lg bg-white/5 border border-white/10"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-white font-medium text-sm mb-1 line-clamp-2">
+                          {blog.title}
+                        </h4>
+                        <p className="text-gray-400 text-xs mb-2">
+                          {blog.category}
+                        </p>
+                        <div className="flex items-center space-x-2 mb-2">
+                          <img
+                            src={blog.author.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${blog.author.username}`}
+                            alt={blog.author.name}
+                            className="w-5 h-5 rounded-full"
+                          />
+                          <span className="text-white text-xs">
+                            {blog.author.name}
+                          </span>
                         </div>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            blog.status === "published"
-                              ? "bg-green-500/20 text-green-400"
-                              : blog.status === "pending"
-                                ? "bg-yellow-500/20 text-yellow-400"
-                                : "bg-gray-500/20 text-gray-400"
-                          }`}
-                        >
-                          {blog.status}
-                        </span>
                       </div>
-                      <div className="flex items-center justify-between text-xs text-gray-400 mb-3">
-                        <span>{blog.stats.views.toLocaleString()} views</span>
-                        <span>{blog.publishedAt}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          size="sm"
-                          onClick={() => setPreviewPost(blog)}
-                          className="glass-button text-gray-300 hover:text-white px-3 py-1 text-xs"
-                        >
-                          <Eye className="h-3 w-3 mr-1" />
-                          View
-                        </Button>
-                        {blog.status === "pending" && (
-                          <>
-                            <Button
-                              size="sm"
-                              onClick={() =>
-                                handleBlogAction(blog.id, "approve")
-                              }
-                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs"
-                            >
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() =>
-                                handleBlogAction(blog.id, "reject")
-                              }
-                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs"
-                            >
-                              <XCircle className="h-3 w-3 mr-1" />
-                              Reject
-                            </Button>
-                          </>
-                        )}
-                        <Button
-                          size="sm"
-                          onClick={() =>
-                            handleBlogAction(blog.id, "delete")
-                          }
-                          className="glass-button text-red-400 hover:text-red-300 px-3 py-1 text-xs"
-                        >
-                          <Trash2 className="h-3 w-3 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          blog.status === "PUBLISHED"
+                            ? "bg-green-500/20 text-green-400"
+                            : blog.status === "PENDING"
+                              ? "bg-yellow-500/20 text-yellow-400"
+                              : "bg-gray-500/20 text-gray-400"
+                        }`}
+                      >
+                        {blog.status.toLowerCase()}
+                      </span>
                     </div>
-                  );
-                })}
+                    <div className="flex items-center justify-between text-xs text-gray-400 mb-3">
+                      <span>{blog.views.toLocaleString()} views</span>
+                      <span>{blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString() : 'Not published'}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => setPreviewPost(blog)}
+                        className="glass-button text-gray-300 hover:text-white px-3 py-1 text-xs"
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </Button>
+                      {blog.status === "PENDING" && (
+                        <>
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleBlogAction(blog.id, "approve")
+                            }
+                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs"
+                          >
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleBlogAction(blog.id, "reject")
+                            }
+                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs"
+                          >
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Reject
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          handleBlogAction(blog.id, "delete")
+                        }
+                        className="glass-button text-red-400 hover:text-red-300 px-3 py-1 text-xs"
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -707,88 +783,11 @@ export default function Admin() {
               <h3 className="text-lg font-semibold text-white mb-4">
                 Comment Moderation
               </h3>
-              <div className="space-y-4">
-                {filteredComments.map((comment) => {
-                  const author = getAuthorById(comment.authorId);
-                  return (
-                    <div
-                      key={comment.id}
-                      className="p-4 rounded-lg bg-white/5 border border-white/10"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <img
-                              src={author?.avatar}
-                              alt={author?.name}
-                              className="w-6 h-6 rounded-full"
-                            />
-                            <span className="text-white text-sm font-medium">
-                              {author?.name}
-                            </span>
-                            <span className="text-gray-400 text-xs">
-                              {comment.createdAt}
-                            </span>
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-xs ${
-                                comment.status === "approved"
-                                  ? "bg-green-500/20 text-green-400"
-                                  : comment.status === "pending"
-                                    ? "bg-yellow-500/20 text-yellow-400"
-                                    : "bg-red-500/20 text-red-400"
-                              }`}
-                            >
-                              {comment.status}
-                            </span>
-                          </div>
-                          <p className="text-gray-300 text-sm mb-2">
-                            {comment.content}
-                          </p>
-                          <p className="text-gray-400 text-xs">
-                            On:{" "}
-                            <span className="text-brand-400">
-                              {blogs.find((b) => b.id === comment.blogId)
-                                ?.title ?? "Unknown"}
-                            </span>
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-4">
-                          {comment.status === "pending" && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() =>
-                                  handleCommentAction(comment.id, "approve")
-                                }
-                                className="bg-green-600 hover:bg-green-700 text-white px-2 py-1"
-                              >
-                                <CheckCircle className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() =>
-                                  handleCommentAction(comment.id, "reject")
-                                }
-                                className="bg-red-600 hover:bg-red-700 text-white px-2 py-1"
-                              >
-                                <XCircle className="h-3 w-3" />
-                              </Button>
-                            </>
-                          )}
-                          <Button
-                            size="sm"
-                            onClick={() =>
-                              handleCommentAction(comment.id, "delete")
-                            }
-                            className="glass-button text-red-400 hover:text-red-300 px-2 py-1"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="text-center py-8">
+                <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-400 text-sm">
+                  Comment moderation system coming soon
+                </p>
               </div>
             </div>
           </div>
@@ -850,12 +849,12 @@ export default function Admin() {
                         <td className="p-4">
                           <span
                             className={`px-2 py-1 rounded-full text-xs ${
-                              author.role === "admin"
+                              author.role === "ADMIN"
                                 ? "bg-yellow-500/20 text-yellow-400"
                                 : "bg-blue-500/20 text-blue-400"
                             }`}
                           >
-                            {author.role}
+                            {author.role.toLowerCase()}
                           </span>
                         </td>
                         <td className="p-4 text-white text-sm">
@@ -865,7 +864,7 @@ export default function Admin() {
                           {author.followersCount.toLocaleString()}
                         </td>
                         <td className="p-4 text-gray-400 text-sm">
-                          {author.joinedAt}
+                          {new Date(author.createdAt).toLocaleDateString()}
                         </td>
                         <td className="p-4">
                           <div className="flex items-center space-x-2">
@@ -874,14 +873,14 @@ export default function Admin() {
                               onClick={() =>
                                 handleUserAction(
                                   author.id,
-                                  author.role === "admin"
+                                  author.role === "ADMIN"
                                     ? "demote"
                                     : "promote",
                                 )
                               }
                               className="glass-button text-gray-400 hover:text-white px-2 py-1"
                             >
-                              {author.role === "admin" ? "Demote" : "Promote"}
+                              {author.role === "ADMIN" ? "Demote" : "Promote"}
                             </Button>
                             <Button
                               size="sm"
@@ -922,12 +921,12 @@ export default function Admin() {
                       </div>
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${
-                          author.role === "admin"
+                          author.role === "ADMIN"
                             ? "bg-yellow-500/20 text-yellow-400"
                             : "bg-blue-500/20 text-blue-400"
                         }`}
                       >
-                        {author.role}
+                        {author.role.toLowerCase()}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mb-3 text-xs text-gray-400">
@@ -941,7 +940,7 @@ export default function Admin() {
                       </div>
                     </div>
                     <div className="text-xs text-gray-400 mb-3">
-                      Joined: {author.joinedAt}
+                      Joined: {new Date(author.createdAt).toLocaleDateString()}
                     </div>
                     <div className="flex items-center space-x-2">
                       <Button
@@ -949,14 +948,14 @@ export default function Admin() {
                         onClick={() =>
                           handleUserAction(
                             author.id,
-                            author.role === "admin"
+                            author.role === "ADMIN"
                               ? "demote"
                               : "promote",
                           )
                         }
                         className="glass-button text-gray-400 hover:text-white px-3 py-1 text-xs"
                       >
-                        {author.role === "admin" ? "Demote" : "Promote"}
+                        {author.role === "ADMIN" ? "Demote" : "Promote"}
                       </Button>
                       <Button
                         size="sm"
@@ -1014,12 +1013,12 @@ export default function Admin() {
                 </h3>
                 <div className="space-y-3">
                   {blogs
-                    .filter((p) => p.status === "published")
-                    .sort((a, b) => b.stats.views - a.stats.views)
+                    .filter((blog) => blog.status === "PUBLISHED")
+                    .sort((a, b) => b.views - a.views)
                     .slice(0, 5)
-                    .map((post, index) => (
+                    .map((blog, index) => (
                       <div
-                        key={post.id}
+                        key={blog.id}
                         className="flex items-center justify-between"
                       >
                         <div className="flex items-center space-x-3">
@@ -1027,11 +1026,11 @@ export default function Admin() {
                             #{index + 1}
                           </span>
                           <span className="text-white text-sm truncate max-w-xs">
-                            {post.title}
+                            {blog.title}
                           </span>
                         </div>
                         <span className="text-brand-400 text-sm">
-                          {post.stats.views.toLocaleString()} views
+                          {blog.views.toLocaleString()} views
                         </span>
                       </div>
                     ))}
@@ -1081,7 +1080,7 @@ export default function Admin() {
                   __html: renderMarkdown(previewPost.content),
                 }}
               />
-              {previewPost.status === "pending" && (
+              {previewPost.status === "PENDING" && (
                 <div className="mt-6 flex items-center justify-end space-x-2">
                   <Button
                     onClick={() => {
