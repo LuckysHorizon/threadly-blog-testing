@@ -57,8 +57,6 @@ export default function Admin() {
   const navigate = useNavigate();
   const [isAdminAllowed, setIsAdminAllowed] = useState<boolean>(false);
   const [checkingAdmin, setCheckingAdmin] = useState<boolean>(true);
-  const [debugRole, setDebugRole] = useState<string>("");
-  const [debugEmail, setDebugEmail] = useState<string>("");
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -120,8 +118,6 @@ export default function Admin() {
         }
 
         const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || '';
-        setDebugRole(roleMeta);
-        setDebugEmail(email);
         setIsAdminAllowed(roleMeta === 'ADMIN' || (adminEmail && email === adminEmail));
       } catch (e) {
         setIsAdminAllowed(false);
@@ -253,12 +249,6 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Debug banner (temporary) */}
-      <div className="fixed top-0 left-0 right-0 z-40 px-3 py-2 text-xs bg-black/60 text-gray-300 border-b border-white/10">
-        <span className="mr-4">roleMeta: <span className="text-white font-mono">{debugRole || 'N/A'}</span></span>
-        <span>email: <span className="text-white font-mono">{debugEmail || 'N/A'}</span></span>
-      </div>
-      <div className="pt-6" />
       {/* Header */}
       <header className="glass-nav border-b border-white/10 px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-7xl mx-auto">
@@ -288,25 +278,26 @@ export default function Admin() {
       {/* Navigation Tabs */}
       <nav className="border-b border-white/10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex space-x-8 overflow-x-auto">
+          <div className="flex space-x-2 sm:space-x-4 lg:space-x-8 overflow-x-auto scrollbar-hide">
             {[
-              { id: "overview", label: "Overview", icon: BarChart3 },
-              { id: "blogs", label: "Blog Posts", icon: FileText },
-              { id: "comments", label: "Comments", icon: MessageCircle },
-              { id: "users", label: "Users", icon: Users },
-              { id: "analytics", label: "Analytics", icon: TrendingUp },
+              { id: "overview", label: "Overview", icon: BarChart3, shortLabel: "Overview" },
+              { id: "blogs", label: "Blog Posts", icon: FileText, shortLabel: "Blogs" },
+              { id: "comments", label: "Comments", icon: MessageCircle, shortLabel: "Comments" },
+              { id: "users", label: "Users", icon: Users, shortLabel: "Users" },
+              { id: "analytics", label: "Analytics", icon: TrendingUp, shortLabel: "Analytics" },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as Tab)}
-                className={`flex items-center space-x-2 py-4 px-2 border-b-2 whitespace-nowrap transition-colors duration-200 ${
+                className={`flex items-center space-x-1 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3 border-b-2 whitespace-nowrap transition-all duration-200 rounded-t-lg ${
                   activeTab === tab.id
-                    ? "border-brand-500 text-brand-400"
-                    : "border-transparent text-gray-400 hover:text-white hover:border-gray-300"
+                    ? "border-brand-500 text-brand-400 bg-white/5"
+                    : "border-transparent text-gray-400 hover:text-white hover:border-gray-300 hover:bg-white/5"
                 }`}
               >
-                <tab.icon className="h-4 w-4" />
-                <span className="text-sm font-medium">{tab.label}</span>
+                <tab.icon className="h-4 w-4 flex-shrink-0" />
+                <span className="text-xs sm:text-sm font-medium hidden xs:inline">{tab.label}</span>
+                <span className="text-xs sm:text-sm font-medium xs:hidden">{tab.shortLabel}</span>
               </button>
             ))}
           </div>
@@ -515,7 +506,8 @@ export default function Admin() {
 
             {/* Blogs List */}
             <div className="glass-card">
-              <div className="overflow-x-auto">
+              {/* Desktop Table */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-white/10">
@@ -641,6 +633,99 @@ export default function Admin() {
                     })}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="lg:hidden space-y-4 p-4">
+                {filteredBlogs.map((blog) => {
+                  const author = getAuthorById(blog.authorId);
+                  return (
+                    <div
+                      key={blog.id}
+                      className="p-4 rounded-lg bg-white/5 border border-white/10"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="text-white font-medium text-sm mb-1 line-clamp-2">
+                            {blog.title}
+                          </h4>
+                          <p className="text-gray-400 text-xs mb-2">
+                            {blog.category}
+                          </p>
+                          <div className="flex items-center space-x-2 mb-2">
+                            <img
+                              src={author?.avatar}
+                              alt={author?.name}
+                              className="w-5 h-5 rounded-full"
+                            />
+                            <span className="text-white text-xs">
+                              {author?.name}
+                            </span>
+                          </div>
+                        </div>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            blog.status === "published"
+                              ? "bg-green-500/20 text-green-400"
+                              : blog.status === "pending"
+                                ? "bg-yellow-500/20 text-yellow-400"
+                                : "bg-gray-500/20 text-gray-400"
+                          }`}
+                        >
+                          {blog.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-400 mb-3">
+                        <span>{blog.stats.views.toLocaleString()} views</span>
+                        <span>{blog.publishedAt}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          size="sm"
+                          onClick={() => setPreviewPost(blog)}
+                          className="glass-button text-gray-300 hover:text-white px-3 py-1 text-xs"
+                        >
+                          <Eye className="h-3 w-3 mr-1" />
+                          View
+                        </Button>
+                        {blog.status === "pending" && (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleBlogAction(blog.id, "approve")
+                              }
+                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs"
+                            >
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleBlogAction(blog.id, "reject")
+                              }
+                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs"
+                            >
+                              <XCircle className="h-3 w-3 mr-1" />
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                        <Button
+                          size="sm"
+                          onClick={() =>
+                            handleBlogAction(blog.id, "delete")
+                          }
+                          className="glass-button text-red-400 hover:text-red-300 px-3 py-1 text-xs"
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

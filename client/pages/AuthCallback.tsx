@@ -18,11 +18,42 @@ export default function AuthCallback() {
         }
 
         if (data.session) {
-          const role = data.session.user.app_metadata?.role;
-          if (role === 'ADMIN') {
-            navigate('/admin');
-          } else {
-            navigate('/');
+          // Get user role from server to ensure accuracy
+          try {
+            const response = await fetch('/api/auth/me', {
+              headers: { 
+                Authorization: `Bearer ${data.session.access_token}` 
+              },
+              credentials: 'include',
+            });
+            
+            if (response.ok) {
+              const userData = await response.json();
+              const userRole = userData.data?.role;
+              
+              if (userRole === 'ADMIN') {
+                navigate('/admin');
+              } else {
+                navigate('/');
+              }
+            } else {
+              // Fallback to client-side role check
+              const role = data.session.user.app_metadata?.role;
+              if (role === 'ADMIN') {
+                navigate('/admin');
+              } else {
+                navigate('/');
+              }
+            }
+          } catch (serverError) {
+            console.warn('Server role check failed, using client-side fallback:', serverError);
+            // Fallback to client-side role check
+            const role = data.session.user.app_metadata?.role;
+            if (role === 'ADMIN') {
+              navigate('/admin');
+            } else {
+              navigate('/');
+            }
           }
         } else {
           // No session, redirect to login

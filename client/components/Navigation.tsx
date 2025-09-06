@@ -11,6 +11,7 @@ import {
   Settings,
   Edit,
   PlusCircle,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -131,6 +132,19 @@ export default function Navigation() {
               <Search className="h-4 w-4" />
               <span className="text-sm hidden lg:inline">Search</span>
             </Button>
+
+            {/* Dashboard Button - For admin users */}
+            {isAuthenticated && user?.role === 'admin' && (
+              <Link to="/admin">
+                <Button
+                  size="sm"
+                  className="hidden sm:flex bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0 shadow-glow px-3 py-2"
+                >
+                  <LayoutDashboard className="h-4 w-4 mr-1.5" />
+                  <span className="hidden lg:inline">Dashboard</span>
+                </Button>
+              </Link>
+            )}
 
             {/* Write Button - For authenticated users */}
             {isAuthenticated && (
@@ -287,7 +301,7 @@ export default function Navigation() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-white/10 mt-2">
+          <div className="lg:hidden border-t border-white/10 mt-2 animate-slide-down">
             <div className="px-3 sm:px-6 py-4 space-y-2">
               {navigationItems.map((item) => (
                 <Link
@@ -313,6 +327,16 @@ export default function Navigation() {
                 <Search className="h-4 w-4 mr-3" />
                 Search Articles
               </Button>
+
+              {/* Mobile Dashboard Button - Only for admin users */}
+              {isAuthenticated && user?.role === 'admin' && (
+                <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full justify-start bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0 mt-3">
+                    <LayoutDashboard className="h-4 w-4 mr-3" />
+                    Admin Dashboard
+                  </Button>
+                </Link>
+              )}
 
               {/* Mobile Write Button - Only for authenticated users */}
               {isAuthenticated && (

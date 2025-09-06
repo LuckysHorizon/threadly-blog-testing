@@ -164,6 +164,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
 router.get('/me', authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;
+    const userEmail = (req as any).user.email;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -191,6 +192,35 @@ router.get('/me', authenticateToken, async (req: Request, res: Response) => {
 
     if (!user) {
       return res.status(404).json(errorResponse('User not found'));
+    }
+
+    // Ensure admin@threadly.com always has admin role
+    if (userEmail === 'admin@threadly.com' && user.role !== 'ADMIN') {
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: { role: 'ADMIN' },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          username: true,
+          avatar: true,
+          bio: true,
+          role: true,
+          provider: true,
+          twitter: true,
+          github: true,
+          linkedin: true,
+          createdAt: true,
+          updatedAt: true,
+          lastLoginAt: true,
+          articlesCount: true,
+          followersCount: true,
+          totalViews: true,
+          totalLikes: true,
+        }
+      });
+      return res.json(successResponse(updatedUser));
     }
 
     res.json(successResponse(user));

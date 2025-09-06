@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import BlogCard from "@/components/BlogCard";
 import { mockCategories } from "@/lib/mockData";
 import { usePosts } from "@/contexts/PostsContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { LayoutDashboard } from "lucide-react";
 
 export default function Index() {
   const [typedText, setTypedText] = useState("");
@@ -35,6 +37,7 @@ export default function Index() {
   }, []);
 
   const { posts } = usePosts();
+  const { user, isAuthenticated } = useAuth();
   const featuredPosts = posts.filter((post) => post.featured);
   const latestPosts = posts.filter((post) => !post.featured).slice(0, 6);
 
@@ -119,6 +122,36 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* Admin Greeting Section */}
+      {isAuthenticated && user?.role === 'admin' && (
+        <section className="py-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="glass-card p-6 sm:p-8 text-center animate-fade-in">
+              <div className="flex items-center justify-center mb-4">
+                <div className="bg-gradient-to-r from-yellow-500 to-orange-500 p-3 rounded-full mr-4">
+                  <LayoutDashboard className="h-6 w-6 text-white" />
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white">
+                  Welcome Admin 👋
+                </h2>
+              </div>
+              <p className="text-gray-300 mb-6 text-base sm:text-lg">
+                Manage your Threadly platform and oversee content moderation
+              </p>
+              <Link to="/admin">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0 shadow-glow px-6 py-3 text-base font-semibold"
+                >
+                  <LayoutDashboard className="h-5 w-5 mr-2" />
+                  Go to Dashboard
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Featured Articles Section */}
       <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">

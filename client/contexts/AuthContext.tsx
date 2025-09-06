@@ -157,14 +157,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
             console.warn('Server role sync failed:', e);
           }
           setUser(nextUser);
-          // Redirect based on server role (which includes Supabase role)
-          try {
+          
+          // Handle redirects based on authentication event and user role
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            // Only redirect on sign in or token refresh, not on initial load
+            const currentPath = window.location.pathname;
             if (nextUser.role === 'admin') {
-              window.location.replace('/admin');
+              // Use navigate instead of window.location.replace for better UX
+              if (currentPath !== '/admin' && !currentPath.startsWith('/admin/')) {
+                window.location.href = '/admin';
+              }
+            } else if (currentPath === '/admin' || currentPath.startsWith('/admin/')) {
+              // If user is not admin but on admin page, redirect to home
+              window.location.href = '/';
             }
-          } catch {}
+          }
         } else {
           setUser(null);
+          // If user signs out and is on admin page, redirect to home
+          const currentPath = window.location.pathname;
+          if (currentPath === '/admin' || currentPath.startsWith('/admin/')) {
+            window.location.href = '/';
+          }
         }
         setIsLoading(false);
       }

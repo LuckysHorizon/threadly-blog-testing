@@ -114,9 +114,10 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
           uniqueUsername = `${preferredUsername}${suffix++}`;
         }
 
-        // Determine role from Supabase app_metadata or default to USER
+        // Determine role from Supabase app_metadata, email check, or default to USER
         const supabaseRole = supabaseUser.app_metadata?.role?.toString().toUpperCase();
-        const userRole = supabaseRole === 'ADMIN' ? 'ADMIN' : 'USER';
+        const isAdminEmail = userEmail === 'admin@threadly.com';
+        const userRole = (supabaseRole === 'ADMIN' || isAdminEmail) ? 'ADMIN' : 'USER';
 
         appUser = await prisma.user.create({
           data: {
@@ -136,12 +137,22 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
           }
         });
       } else {
-        // Update existing user's role if it changed in Supabase
+        // Update existing user's role if it changed in Supabase or email check
         const supabaseRole = supabaseUser.app_metadata?.role?.toString().toUpperCase();
-        if (supabaseRole && supabaseRole !== appUser.role) {
+        const isAdminEmail = userEmail === 'admin@threadly.com';
+        const shouldBeAdmin = (supabaseRole === 'ADMIN' || isAdminEmail);
+        const currentRole = appUser.role;
+        
+        if (shouldBeAdmin && currentRole !== 'ADMIN') {
           appUser = await prisma.user.update({
             where: { id: appUser.id },
-            data: { role: supabaseRole as 'ADMIN' | 'USER' }
+            data: { role: 'ADMIN' }
+          });
+        } else if (!shouldBeAdmin && currentRole === 'ADMIN' && !isAdminEmail) {
+          // Only downgrade if it's not the admin email (safety check)
+          appUser = await prisma.user.update({
+            where: { id: appUser.id },
+            data: { role: 'USER' }
           });
         }
       }
