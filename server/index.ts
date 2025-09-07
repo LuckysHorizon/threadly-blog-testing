@@ -60,11 +60,26 @@ export function createServer() {
     },
   });
 
-  // CORS configuration
+  // CORS configuration (support multiple origins via FRONTEND_URL, comma-separated)
+  const allowedOrigins = (process.env.FRONTEND_URL || '')
+    .split(',')
+    .map(o => o.trim())
+    .filter(Boolean);
   app.use(cors({
-    origin: process.env.NODE_ENV === 'production' 
-      ? [process.env.FRONTEND_URL || 'http://localhost:3000']
-      : true,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // allow server-to-server or curl
+      if (process.env.NODE_ENV !== 'production') return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      // Allow Netlify preview/branch deploy subdomains when base matches
+      const netlifyBase = allowedOrigins.find(o => /netlify\.app$/i.test(new URL(o).hostname));
+      if (netlifyBase) {
+        try {
+          const host = new URL(origin).hostname;
+          if (host.endsWith('.netlify.app')) return callback(null, true);
+        } catch {}
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],

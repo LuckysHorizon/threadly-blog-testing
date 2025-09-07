@@ -525,8 +525,8 @@ router.put('/:id/status', [
     const updatedBlog = await prisma.blog.update({
       where: { id },
       data: {
-        status,
-        publishedAt: status === 'PUBLISHED' ? new Date() : null,
+        status: status === 'APPROVED' ? 'PUBLISHED' : status,
+        publishedAt: (status === 'PUBLISHED' || status === 'APPROVED') ? new Date() : null,
         updatedAt: new Date()
       },
       include: {
@@ -559,9 +559,9 @@ router.put('/:id/status', [
     // Create notification for author
     await prisma.notification.create({
       data: {
-        type: status === 'APPROVED' ? 'BLOG_APPROVED' : 'BLOG_REJECTED',
-        title: `Blog ${status.toLowerCase()}`,
-        message: status === 'APPROVED' 
+        type: (status === 'APPROVED' || status === 'PUBLISHED') ? 'BLOG_PUBLISHED' : 'BLOG_REJECTED',
+        title: `Blog ${(status === 'APPROVED' || status === 'PUBLISHED') ? 'published' : 'rejected'}`,
+        message: (status === 'APPROVED' || status === 'PUBLISHED')
           ? 'Your blog has been approved and is now published!'
           : `Your blog has been rejected. Reason: ${reason || 'No reason provided'}`,
         userId: updatedBlog.authorId,

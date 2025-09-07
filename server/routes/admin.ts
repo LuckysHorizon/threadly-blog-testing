@@ -422,8 +422,9 @@ router.post('/blogs/bulk-action', async (req: Request, res: Response) => {
 
     switch (action) {
       case 'approve':
-        updateData = { status: 'APPROVED' };
-        message = 'Blogs approved successfully';
+        // Normalize to valid enum value in schema
+        updateData = { status: 'PUBLISHED', publishedAt: new Date() };
+        message = 'Blogs approved (published) successfully';
         break;
       case 'reject':
         updateData = { status: 'REJECTED' };
@@ -462,10 +463,10 @@ router.post('/blogs/bulk-action', async (req: Request, res: Response) => {
       });
 
       const notifications = blogs.map(blog => ({
-        type: (action === 'approve' ? 'BLOG_APPROVED' : 'BLOG_REJECTED') as any,
-        title: `Blog ${action === 'approve' ? 'approved' : 'rejected'}`,
+        type: (action === 'approve' ? 'BLOG_PUBLISHED' : 'BLOG_REJECTED') as any,
+        title: `Blog ${action === 'approve' ? 'published' : 'rejected'}`,
         message: action === 'approve' 
-          ? `Your blog "${blog.title}" has been approved!`
+          ? `Your blog "${blog.title}" has been published!`
           : `Your blog "${blog.title}" has been rejected.`,
         userId: blog.authorId,
         blogId: blog.id

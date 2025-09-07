@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "../lib/supabase";
+import { apiUrl, authJsonHeaders } from "../lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminStats, User, Blog, Comment } from "@shared/api";
 
@@ -59,24 +60,27 @@ export default function Admin() {
         if (!token) throw new Error('No access token');
 
         // Load admin stats
-        const statsResponse = await fetch('/api/admin/stats', {
-          headers: { Authorization: `Bearer ${token}` }
+        const statsResponse = await fetch(apiUrl('/api/admin/stats'), {
+          headers: authJsonHeaders(token),
+          credentials: 'include',
         });
         if (!statsResponse.ok) throw new Error('Failed to load stats');
         const statsData = await statsResponse.json();
         setAdminStats(statsData.data);
 
         // Load users
-        const usersResponse = await fetch('/api/admin/users', {
-          headers: { Authorization: `Bearer ${token}` }
+        const usersResponse = await fetch(apiUrl('/api/admin/users'), {
+          headers: authJsonHeaders(token),
+          credentials: 'include',
         });
         if (!usersResponse.ok) throw new Error('Failed to load users');
         const usersData = await usersResponse.json();
         setUsers(usersData.data.data);
 
         // Load pending blogs
-        const blogsResponse = await fetch('/api/admin/blogs/pending', {
-          headers: { Authorization: `Bearer ${token}` }
+        const blogsResponse = await fetch(apiUrl('/api/admin/blogs/pending'), {
+          headers: authJsonHeaders(token),
+          credentials: 'include',
         });
         if (!blogsResponse.ok) throw new Error('Failed to load blogs');
         const blogsData = await blogsResponse.json();

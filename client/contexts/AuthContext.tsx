@@ -7,6 +7,7 @@ import {
 } from "react";
 import { supabase, signUpWithEmail, signInWithEmail, signInWithProvider as supabaseSignInWithProvider, signOut as supabaseSignOut } from "../lib/supabase";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { apiUrl, authJsonHeaders } from "../lib/api";
 
 interface User {
   id: string;
@@ -84,8 +85,8 @@ const convertSupabaseUser = (supabaseUser: SupabaseUser): User => {
 };
 
 async function fetchServerMe(accessToken: string): Promise<Partial<User> & { role?: string }> {
-  const resp = await fetch('/api/auth/me', {
-    headers: { Authorization: `Bearer ${accessToken}` },
+  const resp = await fetch(apiUrl('/api/auth/me'), {
+    headers: authJsonHeaders(accessToken),
     credentials: 'include',
   });
   if (!resp.ok) throw new Error('Failed to fetch user from server');
