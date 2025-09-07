@@ -1,3 +1,5 @@
+import { LoginRequest, LoginResponse, User, CreateUserRequest, UpdateUserRequest, Blog, CreateBlogRequest, UpdateBlogRequest, ApiResponse, PaginatedResponse } from '../../shared/api';
+
 export const API_BASE_URL = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/$/, '');
 
 export function apiUrl(path: string): string {
@@ -19,8 +21,8 @@ export function authJsonHeaders(token?: string): HeadersInit {
   return headers;
 }
 
-// Enhanced fetch helper that auto-attaches Supabase access token
-export async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
+// Generic enhanced fetch helper that auto-attaches Supabase access token and handles JSON response
+export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const { supabase } = await import('../lib/supabase');
   
   // Get current session and access token
@@ -53,6 +55,45 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
     console.log('📡 API Response:', response.status, response.statusText, url);
   }
   
-  return response;
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'API request failed');
+  }
+  
+  const data = await response.json();
+  return data as T;
 }
 
+// API functions
+
+export async function loginUser(request: LoginRequest): Promise<ApiResponse<LoginResponse>> {
+  return apiFetch<ApiResponse<LoginResponse>>('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+}
+
+export async function getBlogs(params?: Record<string, any>): Promise<ApiResponse<PaginatedResponse<Blog>>> {
+  const query = params ? '?' + new URLSearchParams(params).toString() : '';
+  return apiFetch<ApiResponse<PaginatedResponse<Blog>>>(`/api/blogs${query}`);
+}
+
+export async function createBlog(request: CreateBlogRequest): Promise<ApiResponse<Blog>> {
+  return apiFetch<ApiResponse<Blog>>('/api/blogs', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+}
+
+export async function updateUser(userId: string, request: UpdateUserRequest): Promise<ApiResponse<User>> {
+  return apiFetch<ApiResponse<User>>(`/api/users/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify(request),
+  });
+}
+
+// Add other API functions similarly as needed...
+
+export async function checkHealth(): Promise<ApiResponse<{ status: string }>> {
+  return apiFetch<ApiResponse<{ status: string }>>('/api/health');
+}
