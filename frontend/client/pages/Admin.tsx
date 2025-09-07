@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "../lib/supabase";
-import { apiUrl, authJsonHeaders } from "../lib/api";
+import { apiFetch } from "../lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminStats, User, Blog, Comment } from "@shared/api";
 
@@ -56,32 +56,20 @@ export default function Admin() {
       setError(null);
       
       try {
-        const token = (await supabase.auth.getSession()).data.session?.access_token;
-        if (!token) throw new Error('No access token');
-
         // Load admin stats
-        const statsResponse = await fetch(apiUrl('/api/admin/stats'), {
-          headers: authJsonHeaders(token),
-          credentials: 'include',
-        });
+        const statsResponse = await apiFetch('/api/admin/stats');
         if (!statsResponse.ok) throw new Error('Failed to load stats');
         const statsData = await statsResponse.json();
         setAdminStats(statsData.data);
 
         // Load users
-        const usersResponse = await fetch(apiUrl('/api/admin/users'), {
-          headers: authJsonHeaders(token),
-          credentials: 'include',
-        });
+        const usersResponse = await apiFetch('/api/admin/users');
         if (!usersResponse.ok) throw new Error('Failed to load users');
         const usersData = await usersResponse.json();
         setUsers(usersData.data.data);
 
         // Load pending blogs
-        const blogsResponse = await fetch(apiUrl('/api/admin/blogs/pending'), {
-          headers: authJsonHeaders(token),
-          credentials: 'include',
-        });
+        const blogsResponse = await apiFetch('/api/admin/blogs/pending');
         if (!blogsResponse.ok) throw new Error('Failed to load blogs');
         const blogsData = await blogsResponse.json();
         setBlogs(blogsData.data.data);
@@ -135,15 +123,8 @@ export default function Admin() {
     action: "approve" | "reject" | "delete",
   ) => {
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      if (!token) throw new Error('No access token');
-
-      const response = await fetch('/api/admin/blogs/bulk-action', {
+      const response = await apiFetch('/api/admin/blogs/bulk-action', {
         method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify({
           blogIds: [blogId],
           action: action === "approve" ? "approve" : action === "reject" ? "reject" : "delete"
@@ -154,17 +135,13 @@ export default function Admin() {
 
       // Refresh data
       const loadAdminData = async () => {
-        const statsResponse = await fetch('/api/admin/stats', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const statsResponse = await apiFetch('/api/admin/stats');
         if (statsResponse.ok) {
           const statsData = await statsResponse.json();
           setAdminStats(statsData.data);
         }
 
-        const blogsResponse = await fetch('/api/admin/blogs/pending', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const blogsResponse = await apiFetch('/api/admin/blogs/pending');
         if (blogsResponse.ok) {
           const blogsData = await blogsResponse.json();
           setBlogs(blogsData.data.data);
@@ -193,16 +170,9 @@ export default function Admin() {
     action: "promote" | "demote" | "block" | "unblock",
   ) => {
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      if (!token) throw new Error('No access token');
-
       if (action === "promote" || action === "demote") {
-        const response = await fetch(`/api/admin/users/${userId}/role`, {
+        const response = await apiFetch(`/api/admin/users/${userId}/role`, {
           method: 'PUT',
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
           body: JSON.stringify({
             role: action === "promote" ? "ADMIN" : "USER"
           })
@@ -211,9 +181,7 @@ export default function Admin() {
         if (!response.ok) throw new Error('Failed to update user role');
 
         // Refresh users data
-        const usersResponse = await fetch('/api/admin/users', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const usersResponse = await apiFetch('/api/admin/users');
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
           setUsers(usersData.data.data);

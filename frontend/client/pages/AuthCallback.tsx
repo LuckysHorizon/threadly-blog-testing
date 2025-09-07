@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { apiFetch } from '../lib/api';
 
 export default function AuthCallback() {
   const [loading, setLoading] = useState(true);
@@ -20,12 +21,7 @@ export default function AuthCallback() {
         if (data.session) {
           // Get user role from server to ensure accuracy
           try {
-            const response = await fetch('/api/auth/me', {
-              headers: { 
-                Authorization: `Bearer ${data.session.access_token}` 
-              },
-              credentials: 'include',
-            });
+            const response = await apiFetch('/api/auth/me');
             
             if (response.ok) {
               const userData = await response.json();

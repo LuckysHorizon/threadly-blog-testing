@@ -23,7 +23,7 @@ export default function Navigation() {
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, isAuthenticated, signOut } = useAuth();
+  const { user, isAuthenticated, signOut, isInitializing } = useAuth();
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -267,18 +267,32 @@ export default function Navigation() {
                   size="sm"
                   className="glass-button text-gray-300 hover:text-white px-2 sm:px-3 py-2"
                   onClick={() => setIsSignInModalOpen(true)}
+                  disabled={isInitializing}
                 >
-                  <LogIn className="h-4 w-4 sm:mr-1.5" />
-                  <span className="hidden sm:inline text-sm">Sign In</span>
+                  {isInitializing ? (
+                    <div className="w-4 h-4 border-2 border-gray-300/30 border-t-gray-300 rounded-full animate-spin sm:mr-1.5" />
+                  ) : (
+                    <LogIn className="h-4 w-4 sm:mr-1.5" />
+                  )}
+                  <span className="hidden sm:inline text-sm">
+                    {isInitializing ? "Loading..." : "Sign In"}
+                  </span>
                 </Button>
 
                 <Button
                   size="sm"
                   className="bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0 shadow-glow px-2 sm:px-3 py-2"
                   onClick={() => setIsSignInModalOpen(true)}
+                  disabled={isInitializing}
                 >
-                  <User className="h-4 w-4 sm:mr-1.5" />
-                  <span className="hidden sm:inline text-sm">Get Started</span>
+                  {isInitializing ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin sm:mr-1.5" />
+                  ) : (
+                    <User className="h-4 w-4 sm:mr-1.5" />
+                  )}
+                  <span className="hidden sm:inline text-sm">
+                    {isInitializing ? "Loading..." : "Get Started"}
+                  </span>
                 </Button>
               </div>
             )}
@@ -358,9 +372,14 @@ export default function Navigation() {
                       setIsSignInModalOpen(true);
                       setIsMobileMenuOpen(false);
                     }}
+                    disabled={isInitializing}
                   >
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Sign In
+                    {isInitializing ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                    ) : (
+                      <LogIn className="h-4 w-4 mr-2" />
+                    )}
+                    {isInitializing ? "Loading..." : "Sign In"}
                   </Button>
                   <Button
                     className="w-full bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0"
@@ -368,9 +387,14 @@ export default function Navigation() {
                       setIsSignInModalOpen(true);
                       setIsMobileMenuOpen(false);
                     }}
+                    disabled={isInitializing}
                   >
-                    <User className="h-4 w-4 mr-2" />
-                    Get Started
+                    {isInitializing ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                    ) : (
+                      <User className="h-4 w-4 mr-2" />
+                    )}
+                    {isInitializing ? "Loading..." : "Get Started"}
                   </Button>
                 </div>
               )}

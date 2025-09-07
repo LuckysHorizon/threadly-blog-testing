@@ -4,6 +4,11 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import path from "path";
+import { fileURLToPath } from 'url';
+
+// ESM-compatible __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Import routes
 import { handleDemo } from "./routes/demo";
@@ -78,6 +83,13 @@ export function createServer() {
           if (host.endsWith('.netlify.app')) return callback(null, true);
         } catch {}
       }
+      // Allow any netlify.app subdomain in production
+      if (process.env.NODE_ENV === 'production') {
+        try {
+          const host = new URL(origin).hostname;
+          if (host.endsWith('.netlify.app')) return callback(null, true);
+        } catch {}
+      }
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
@@ -89,8 +101,8 @@ export function createServer() {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-  // Static file serving for uploads
-  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+  // Static file serving for uploads (relative to backend cwd)
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Health check endpoint
   app.get("/health", (_req, res) => {
@@ -104,6 +116,23 @@ export function createServer() {
   });
 
   // API routes
+  // API base info
+  app.get('/api', (_req, res) => {
+    res.json({
+      success: true,
+      message: 'API is running',
+      endpoints: [
+        '/api/auth/*',
+        '/api/admin/*',
+        '/api/blogs/*',
+        '/api/comments/*',
+        '/api/notifications/*',
+        '/api/ai/*',
+        '/api/upload/*'
+      ]
+    });
+  });
+
   app.use("/api/auth", authLimiter, authRoutes);
   app.use("/api/blogs", blogRoutes);
   app.use("/api/comments", commentRoutes);
@@ -120,8 +149,8 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
-  // 404 handler for undefined routes
-  app.use("*", (req, res) => {
+  // 404 handler for undefined routes (Express 5: avoid '*' which breaks path-to-regexp)
+  app.use((req, res) => {
     res.status(404).json({
       success: false,
       error: `Route ${req.originalUrl} not found`,

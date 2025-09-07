@@ -31,7 +31,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const { signIn, signUp, signInWithProvider, isLoading } = useAuth();
+  const { signIn, signUp, signInWithProvider, isLoading, isInitializing } = useAuth();
 
   const resetForm = () => {
     setEmail("");
@@ -147,7 +147,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
               variant="outline"
               className="w-full glass-button text-white border-white/20 hover:bg-white/10"
               onClick={() => handleSocialSignIn("google")}
-              disabled={isLoading}
+              disabled={isLoading || isInitializing}
             >
               <Chrome className="h-5 w-5 mr-3" />
               Continue with Google
@@ -157,7 +157,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
               variant="outline"
               className="w-full glass-button text-white border-white/20 hover:bg-white/10"
               onClick={() => handleSocialSignIn("github")}
-              disabled={isLoading}
+              disabled={isLoading || isInitializing}
             >
               <Github className="h-5 w-5 mr-3" />
               Continue with GitHub
@@ -294,7 +294,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isInitializing}
               className="w-full bg-gradient-to-r from-brand-500 to-purple-500 hover:from-brand-600 hover:to-purple-600 text-white border-0 shadow-glow py-3 font-semibold"
             >
               {isLoading ? (

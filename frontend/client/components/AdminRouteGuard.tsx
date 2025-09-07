@@ -7,14 +7,14 @@ interface AdminRouteGuardProps {
 }
 
 export default function AdminRouteGuard({ children }: AdminRouteGuardProps) {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { user, isLoading, isInitializing, isAuthenticated } = useAuth();
   const [isChecking, setIsChecking] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const checkAdminAccess = async () => {
-      // Wait for auth to finish loading
-      if (isLoading) {
+      // Wait for auth to finish initializing and loading
+      if (isInitializing || isLoading) {
         return;
       }
 
@@ -35,10 +35,10 @@ export default function AdminRouteGuard({ children }: AdminRouteGuardProps) {
     };
 
     checkAdminAccess();
-  }, [user, isLoading, isAuthenticated, navigate]);
+  }, [user, isLoading, isInitializing, isAuthenticated, navigate]);
 
   // Show loading while checking authentication
-  if (isLoading || isChecking) {
+  if (isInitializing || isLoading || isChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

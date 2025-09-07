@@ -8,6 +8,7 @@ import prisma from './database';
 
 // JWT Configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
+const SUPABASE_JWT_SECRET = process.env.SUPABASE_JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret';
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
@@ -62,6 +63,20 @@ export const verifyRefreshToken = (token: string): any => {
   }
 };
 
+// Supabase JWT verification
+export const verifySupabaseJWT = (token: string): any => {
+  if (!SUPABASE_JWT_SECRET) {
+    console.warn('SUPABASE_JWT_SECRET not set, falling back to JWT verification');
+    return null;
+  }
+  
+  try {
+    return jwt.verify(token, SUPABASE_JWT_SECRET);
+  } catch (error) {
+    return null;
+  }
+};
+
 // Middleware types
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -84,7 +99,18 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
   }
 
   try {
-    // First try Supabase token verification
+    // First try Supabase JWT verification (for production)
+    const supabaseJWT = verifySupabaseJWT(token);
+    if (supabaseJWT) {
+      req.user = {
+        userId: supabaseJWT.sub,
+        email: supabaseJWT.email,
+        role: supabaseJWT.app_metadata?.role || (supabaseJWT.email === 'admin@threadly.com' ? 'ADMIN' : 'USER'),
+      };
+      return next();
+    }
+
+    // Fallback to Supabase API verification (for development)
     const supabaseUser = await verifySupabaseToken(token);
     if (supabaseUser) {
       // Ensure an application user exists and get role from our DB
@@ -172,13 +198,13 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
       return next();
     }
 
-    return res.status(403).json({
+    return res.status(401).json({
       success: false,
       error: 'Invalid or expired token',
     } as ApiResponse<null>);
   } catch (error) {
     console.error('Authentication error:', error);
-    return res.status(403).json({
+    return res.status(401).json({
       success: false,
       error: 'Invalid or expired token',
     } as ApiResponse<null>);

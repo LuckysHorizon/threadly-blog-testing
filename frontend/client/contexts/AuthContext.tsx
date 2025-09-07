@@ -7,7 +7,7 @@ import {
 } from "react";
 import { supabase, signUpWithEmail, signInWithEmail, signInWithProvider as supabaseSignInWithProvider, signOut as supabaseSignOut } from "../lib/supabase";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
-import { apiUrl, authJsonHeaders } from "../lib/api";
+import { apiFetch } from "../lib/api";
 
 interface User {
   id: string;
@@ -38,6 +38,7 @@ interface SignUpData {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  isInitializing: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (data: SignUpData) => Promise<void>;
   signInWithProvider: (provider: "google" | "github") => Promise<void>;
@@ -84,11 +85,8 @@ const convertSupabaseUser = (supabaseUser: SupabaseUser): User => {
   };
 };
 
-async function fetchServerMe(accessToken: string): Promise<Partial<User> & { role?: string }> {
-  const resp = await fetch(apiUrl('/api/auth/me'), {
-    headers: authJsonHeaders(accessToken),
-    credentials: 'include',
-  });
+async function fetchServerMe(): Promise<Partial<User> & { role?: string }> {
+  const resp = await apiFetch('/api/auth/me');
   if (!resp.ok) throw new Error('Failed to fetch user from server');
   const json = await resp.json();
   return json?.data || {};
@@ -98,7 +96,7 @@ async function fetchServerMe(accessToken: string): Promise<Partial<User> & { rol
 async function syncUserWithPrisma(supabaseUser: SupabaseUser, accessToken: string): Promise<User> {
   try {
     // First, try to get the user from our server (which handles Prisma sync)
-    const serverUser = await fetchServerMe(accessToken);
+    const serverUser = await fetchServerMe();
     
     // Convert Supabase user to our User format
     const userMetadata = supabaseUser.user_metadata || {};
@@ -183,7 +181,8 @@ async function syncUserWithPrisma(supabaseUser: SupabaseUser, accessToken: strin
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   // Initialize auth state and listen for changes
   useEffect(() => {
@@ -201,6 +200,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             if (session.access_token) {
               const nextUser = await syncUserWithPrisma(session.user, session.access_token);
               setUser(nextUser);
+              if (process.env.NODE_ENV === 'development') {
+                console.log('🔐 Initial session restored:', nextUser.email, nextUser.role);
+              }
             } else {
               // Fallback if no access token
               const nextUser = convertSupabaseUser(session.user);
@@ -216,7 +218,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } catch (error) {
         console.error('Error in getInitialSession:', error);
       } finally {
-        setIsLoading(false);
+        setIsInitializing(false);
       }
     };
 
@@ -225,13 +227,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔐 Auth state changed:', event, session?.user?.email);
+        }
         
         if (session?.user) {
           try {
             if (session.access_token) {
               const nextUser = await syncUserWithPrisma(session.user, session.access_token);
               setUser(nextUser);
+              
+              if (process.env.NODE_ENV === 'development') {
+                console.log('✅ User signed in:', nextUser.email, nextUser.role);
+              }
               
               // Handle redirects based on authentication event and user role
               if (event === 'SIGNED_IN') {
@@ -258,13 +266,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
         } else {
           setUser(null);
+          if (process.env.NODE_ENV === 'development') {
+            console.log('❌ User signed out');
+          }
           // If user signs out and is on admin page, redirect to home
           const currentPath = window.location.pathname;
           if (currentPath === '/admin' || currentPath.startsWith('/admin/')) {
             window.location.href = '/';
           }
         }
-        setIsLoading(false);
+        setIsInitializing(false);
       }
     );
 
@@ -356,6 +367,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value: AuthContextType = {
     user,
     isLoading,
+    isInitializing,
     signIn,
     signUp,
     signInWithProvider,
