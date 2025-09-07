@@ -175,15 +175,4 @@ export function createServer() {
   return app;
 }
 
-// Start the server if this file is run directly
-if (require.main === module) {
-  const app = createServer();
-  const PORT = process.env.PORT || 8080;
-  
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/health`);
-    console.log(`🔗 API base: http://localhost:${PORT}/api`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  });
-}
+// No self-start here; startup is handled by backend/index.ts
