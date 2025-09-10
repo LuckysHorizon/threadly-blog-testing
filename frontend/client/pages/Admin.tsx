@@ -10,21 +10,14 @@ import {
   Heart,
   CheckCircle,
   XCircle,
-  Edit,
   Trash2,
   Clock,
   Crown,
   Search,
-  Filter,
-  MoreHorizontal,
-  Calendar,
-  ArrowUp,
-  ArrowDown,
   AlertTriangle,
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "../lib/supabase";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminStats, User, Blog, Comment } from "@shared/api";
@@ -38,7 +31,7 @@ export default function Admin() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [previewPost, setPreviewPost] = useState<Blog | null>(null);
-  
+
   // Real data state
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
@@ -48,158 +41,89 @@ export default function Admin() {
   const [error, setError] = useState<string | null>(null);
 
   // Load admin data
-  useEffect(() => {
-    const loadAdminData = async () => {
-      if (!isAuthenticated || user?.role !== 'admin') return;
-      
-      setDataLoading(true);
-      setError(null);
-      
-      try {
-        // Load admin stats
-        const statsResponse = await apiFetch('/api/admin/stats');
-        if (!statsResponse.ok) throw new Error('Failed to load stats');
-        const statsData = await statsResponse.json();
-        setAdminStats(statsData.data);
+useEffect(() => {
+  const loadAdminData = async () => {
+    if (!isAuthenticated || user?.role !== "admin") return;
 
-        // Load users
-        const usersResponse = await apiFetch('/api/admin/users');
-        if (!usersResponse.ok) throw new Error('Failed to load users');
-        const usersData = await usersResponse.json();
-        setUsers(usersData.data.data);
+    setDataLoading(true);
+    setError(null);
 
-        // Load pending blogs
-        const blogsResponse = await apiFetch('/api/admin/blogs/pending');
-        if (!blogsResponse.ok) throw new Error('Failed to load blogs');
-        const blogsData = await blogsResponse.json();
-        setBlogs(blogsData.data.data);
-
-        // Load comments (using existing context for now)
-        // TODO: Implement real comments API
-        setComments([]);
-
-      } catch (err) {
-        console.error('Failed to load admin data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load data');
-      } finally {
-        setDataLoading(false);
-      }
-    };
-
-    loadAdminData();
-  }, [isAuthenticated, user?.role]);
-
-  const renderMarkdown = (text: string) =>
-    text
-      .replace(
-        /^### (.*$)/gim,
-        '<h3 class="text-lg font-bold text-white mt-4 mb-2">$1<\/h3>',
-      )
-      .replace(
-        /^## (.*$)/gim,
-        '<h2 class="text-xl font-bold text-white mt-5 mb-3">$1<\/h2>',
-      )
-      .replace(
-        /^# (.*$)/gim,
-        '<h1 class="text-2xl font-bold text-white mt-6 mb-4">$1<\/h1>',
-      )
-      .replace(
-        /\*\*(.*?)\*\*/g,
-        '<strong class="font-bold text-white">$1<\/strong>',
-      )
-      .replace(/\*(.*?)\*/g, '<em class="italic">$1<\/em>')
-      .replace(
-        /`(.*?)`/g,
-        '<code class="bg-gray-800 px-1 py-0.5 rounded text-brand-400">$1<\/code>',
-      )
-      .replace(/\n/g, "<br>");
-
-  // Simple admin check using AuthContext
-  const isAdmin = isAuthenticated && user?.role === 'admin';
-
-  // Handle blog actions
-  const handleBlogAction = async (
-    blogId: string,
-    action: "approve" | "reject" | "delete",
-  ) => {
     try {
-      const response = await apiFetch('/api/admin/blogs/bulk-action', {
-        method: 'POST',
+      const stats = await apiFetch<{ data: AdminStats }>("/api/admin/stats");
+      setAdminStats(stats.data);
+
+      const usersRes = await apiFetch<{ data: { data: User[] } }>("/api/admin/users");
+      setUsers(usersRes.data.data);
+
+      const blogsRes = await apiFetch<{ data: { data: Blog[] } }>("/api/admin/blogs/pending");
+      setBlogs(blogsRes.data.data);
+
+      setComments([]); // placeholder
+    } catch (err) {
+      console.error("Failed to load admin data:", err);
+      setError(err instanceof Error ? err.message : "Failed to load data");
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  loadAdminData();
+}, [isAuthenticated, user?.role]);
+
+// Handle blog actions
+const handleBlogAction = async (
+  blogId: string,
+  action: "approve" | "reject" | "delete"
+) => {
+  try {
+    await apiFetch("/api/admin/blogs/bulk-action", {
+      method: "POST",
+      body: JSON.stringify({ blogIds: [blogId], action }),
+    });
+
+    const stats = await apiFetch<{ data: AdminStats }>("/api/admin/stats");
+    setAdminStats(stats.data);
+
+    const blogsRes = await apiFetch<{ data: { data: Blog[] } }>("/api/admin/blogs/pending");
+    setBlogs(blogsRes.data.data);
+  } catch (err) {
+    console.error("Failed to perform blog action:", err);
+    setError(err instanceof Error ? err.message : "Failed to perform action");
+  }
+};
+
+// Handle user actions
+const handleUserAction = async (
+  userId: string,
+  action: "promote" | "demote" | "block" | "unblock"
+) => {
+  try {
+    if (action === "promote" || action === "demote") {
+      await apiFetch(`/api/admin/users/${userId}/role`, {
+        method: "PUT",
         body: JSON.stringify({
-          blogIds: [blogId],
-          action: action === "approve" ? "approve" : action === "reject" ? "reject" : "delete"
-        })
+          role: action === "promote" ? "ADMIN" : "USER",
+        }),
       });
 
-      if (!response.ok) throw new Error('Failed to perform action');
-
-      // Refresh data
-      const loadAdminData = async () => {
-        const statsResponse = await apiFetch('/api/admin/stats');
-        if (statsResponse.ok) {
-          const statsData = await statsResponse.json();
-          setAdminStats(statsData.data);
-        }
-
-        const blogsResponse = await apiFetch('/api/admin/blogs/pending');
-        if (blogsResponse.ok) {
-          const blogsData = await blogsResponse.json();
-          setBlogs(blogsData.data.data);
-        }
-      };
-
-      loadAdminData();
-    } catch (err) {
-      console.error('Failed to perform blog action:', err);
-      setError(err instanceof Error ? err.message : 'Failed to perform action');
+      const usersRes = await apiFetch<{ data: { data: User[] } }>("/api/admin/users");
+      setUsers(usersRes.data.data);
     }
-  };
+  } catch (err) {
+    console.error("Failed to perform user action:", err);
+    setError(err instanceof Error ? err.message : "Failed to perform action");
+  }
+};
 
-  // Handle comment actions
-  const handleCommentAction = async (
-    commentId: string,
-    action: "approve" | "reject" | "delete",
-  ) => {
-    // TODO: Implement real comment moderation API
-    console.log(`${action} comment ${commentId}`);
-  };
 
-  // Handle user actions
-  const handleUserAction = async (
-    userId: string,
-    action: "promote" | "demote" | "block" | "unblock",
-  ) => {
-    try {
-      if (action === "promote" || action === "demote") {
-        const response = await apiFetch(`/api/admin/users/${userId}/role`, {
-          method: 'PUT',
-          body: JSON.stringify({
-            role: action === "promote" ? "ADMIN" : "USER"
-          })
-        });
-
-        if (!response.ok) throw new Error('Failed to update user role');
-
-        // Refresh users data
-        const usersResponse = await apiFetch('/api/admin/users');
-        if (usersResponse.ok) {
-          const usersData = await usersResponse.json();
-          setUsers(usersData.data.data);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to perform user action:', err);
-      setError(err instanceof Error ? err.message : 'Failed to perform action');
-    }
-  };
-
-  // Filter data based on search and status
+  // Filters
   const filteredBlogs = blogs.filter((blog) => {
     const matchesSearch = blog.title
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesStatus =
-      filterStatus === "all" || blog.status.toLowerCase() === filterStatus;
+      filterStatus === "all" ||
+      blog.status.toLowerCase() === filterStatus.toLowerCase();
     return matchesSearch && matchesStatus;
   });
 
@@ -207,20 +131,21 @@ export default function Admin() {
     const q = searchQuery.toLowerCase();
     const post = blogs.find((b) => b.id === comment.blogId);
     const blogTitle = post?.title?.toLowerCase() ?? "";
-    const matchesSearch =
-      comment.content.toLowerCase().includes(q) || blogTitle.includes(q);
-    return matchesSearch;
+    return (
+      comment.content.toLowerCase().includes(q) || blogTitle.includes(q)
+    );
   });
 
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
+  const filteredUsers = users.filter((u) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      u.name.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      u.username.toLowerCase().includes(q)
+    );
   });
 
-  // Show loading while checking authentication
+  // Loading states
   if (isLoading || dataLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -232,28 +157,29 @@ export default function Admin() {
     );
   }
 
-  // If not authenticated or not admin, redirect to home
-  if (!isAuthenticated || !isAdmin) {
-    navigate('/', { replace: true });
-    return null;
-  }
+  // Simple admin check
+const isAdmin = isAuthenticated && user?.role === "admin";
 
-  // Show error state
+// Redirect non-admins
+if (!isAuthenticated || !isAdmin) {
+  navigate("/", { replace: true });
+  return null;
+}
+
+  // Error state
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <AlertTriangle className="h-12 w-12 text-red-400 mx-auto mb-4" />
           <p className="text-red-400 mb-4">{error}</p>
-          <Button onClick={() => window.location.reload()}>
-            Retry
-          </Button>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
         </div>
       </div>
     );
   }
 
-  // Show loading state if no data yet
+  // No stats yet
   if (!adminStats) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -263,6 +189,13 @@ export default function Admin() {
         </div>
       </div>
     );
+  }
+
+  
+
+
+  function renderMarkdown(content: string): string | TrustedHTML {
+    throw new Error("Function not implemented.");
   }
 
   return (
@@ -1046,6 +979,7 @@ export default function Admin() {
               {previewPost.excerpt && (
                 <p className="text-gray-300 mb-4">{previewPost.excerpt}</p>
               )}
+              
               <div
                 className="prose prose-invert max-w-none text-gray-300"
                 dangerouslySetInnerHTML={{
